@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "eslint": {
+    "config": ["{apps,libs}/**/eslint.config.mjs"]
+  },
+  "nx": {
+    "config": [
+      "nx.json",
+      "project.json",
+      "{apps,libs}/**/project.json",
+      "package.json"
+    ]
+  },
+  "entry": ["{apps,libs}/**/src/{index,main}.{ts,tsx}"],
+  "project": ["{apps,libs}/**/src/**/*.{ts,tsx}"],
+  "ignoreDependencies": ["@funkp/.+", "@nx/workspace"]
+}

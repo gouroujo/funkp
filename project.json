@@ -1,0 +1,23 @@
+{
+  "name": "@funkp/source",
+  "$schema": "node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "local-registry": {
+      "executor": "@nx/js:verdaccio",
+      "options": {
+        "port": 4873,
+        "config": ".verdaccio/config.yml",
+        "storage": "tmp/local-registry/storage"
+      }
+    },
+    "knip": {
+      "executor": "nx:run-script",
+      "metadata": {
+        "description": "Check that all files and dependencies are used"
+      },
+      "options": {
+        "script": "knip"
+      }
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "@funkp/core",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/main.cjs",
+  "module": "./dist/main.mjs",
+  "types": "./dist/main.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "development": "./src/main.ts",
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.mjs",
+      "default": "./dist/main.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/*.tsbuildinfo"
+  ],
+  "dependencies": {},
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/esbuild:esbuild",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "options": {
+          "platform": "node",
+          "outputPath": "libs/core/dist",
+          "main": "libs/core/src/main.ts",
+          "tsConfig": "libs/core/tsconfig.build.json",
+          "format": [
+            "esm",
+            "cjs"
+          ],
+          "esbuildOptions": {
+            "sourcemap": true,
+            "outExtension": {
+              ".js": ".mjs",
+              ".cjs": ".cjs"
+            }
+          },
+          "declarationRootDir": "libs/core/src"
+        }
+      }
+    }
+  }
+}
