@@ -1,6 +1,8 @@
 export * from './isLeft'
 export * from './isRight'
 export * from './mapRight'
+export * from './right'
+export * from './left'
 
 export interface Left<L> {
   readonly _tag: 'Left'
@@ -12,3 +14,9 @@ export interface Right<R> {
 }
 
 export type Either<L, R> = Left<L> | Right<R>
+
+export type RightType<E extends Either<unknown, unknown>> =
+  E extends Right<infer R> ? R : never
+
+export type LeftType<E extends Either<unknown, unknown>> =
+  E extends Left<infer L> ? L : never
