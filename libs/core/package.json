@@ -18,7 +18,9 @@
     "dist",
     "!**/*.tsbuildinfo"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "vite": "^6.0.0"
+  },
   "nx": {
     "targets": {
       "build": {
@@ -43,6 +45,15 @@
             }
           },
           "declarationRootDir": "libs/core/src"
+        }
+      },
+      "test": {
+        "executor": "@nx/vite:test",
+        "outputs": [
+          "{workspaceRoot}/coverage/libs/core"
+        ],
+        "options": {
+          "config": "libs/core/vite.config.ts"
         }
       }
     }
