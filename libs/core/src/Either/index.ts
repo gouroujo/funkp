@@ -1,9 +1,13 @@
 export * from './bimap'
+export * from './filterOrElse'
 export * from './isLeft'
 export * from './isRight'
 export * from './left'
+export * from './mapLeft'
 export * from './mapRight'
+export * from './orElse'
 export * from './right'
+export * from './tryCatch'
 
 /**
  * Represents the Left variant of an {@link Either}.
@@ -46,12 +50,13 @@ export interface Right<R> {
 }
 
 /**
- * The Either type represents a value of one of two possible types (a disjoint union).
+ * Represents a value of one of two possible types (a disjoint union).
  *
- * An instance of Either is either an instance of {@link Left} or {@link Right}.
- *
- * - `Left` is typically used for failure or error.
- * - `Right` is typically used for success.
+ * An instance of Either is either an instance of Left or Right.
+ * A common use of Either is as an alternative to Option for dealing with possible
+ * missing values. In this usage, None is replaced with a Left which can contain useful information.
+ * Right takes the place of Some.
+ * Convention dictates that Left is used for failure and Right is used for success.
  *
  * @typeParam L - Type of the Left value
  * @typeParam R - Type of the Right value

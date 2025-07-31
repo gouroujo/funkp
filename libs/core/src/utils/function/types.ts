@@ -5,3 +5,4 @@ export type AnyFunc<TArgs extends any[] = any[], TOut = any> = (
 export type UnaryFunction<TIn = any, TOut = any> = (arg: TIn) => TOut
 export type FunctionInput<F extends UnaryFunction> = Parameters<F>[0]
 export type FunctionOutput<F extends UnaryFunction> = ReturnType<F>
+export type Predicate<T = any> = (value: T) => boolean
