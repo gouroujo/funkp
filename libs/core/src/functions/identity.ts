@@ -1,4 +1,25 @@
-export const identity = <T>(x: T): T => x
+/**
+ * The identity function. Returns the input value unchanged.
+ *
+ * Useful as a default or placeholder function, or in functional programming pipelines.
+ *
+ * @typeParam T - The type of the input and output value
+ * @param value - The value to return
+ * @returns The same value that was passed in
+ *
+ * @example
+ * ```typescript
+ * import { identity } from '@funkp/core'
+ *
+ * identity(42) // 42
+ * identity('hello') // 'hello'
+ * identity([1, 2, 3]) // [1, 2, 3]
+ *
+ * // In a pipeline
+ * [1, 2, 3].map(identity) // [1, 2, 3]
+ * ```
+ */
+export const identity = <T>(value: T): T => value
 
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest

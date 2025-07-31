@@ -18,5 +18,8 @@
   },
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "github.copilot.chat.localeOverride": "en",
+  "github.copilot.chat.agent.thinkingTool": true,
+  "github.copilot.chat.generateTests.codeLens": true
 }

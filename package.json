@@ -19,6 +19,7 @@
     "@vitest/ui": "^3.0.0",
     "eslint": "^9",
     "eslint-config-prettier": "^10",
+    "eslint-plugin-tsdoc": "^0.4.0",
     "jiti": "2.4.2",
     "jsonc-eslint-parser": "^2",
     "nx": "^21",
