@@ -43,4 +43,26 @@ export default [
     // Override or add rules here
     rules: {},
   },
+  {
+    files: ['{package,project}.json'],
+    languageOptions: {
+      parser: await import('jsonc-eslint-parser'),
+    },
+    rules: {
+      '@nx/dependency-checks': [
+        'error',
+        {
+          buildTargets: ['build'],
+          checkMissingDependencies: true,
+          checkObsoleteDependencies: true,
+          checkVersionMismatches: true,
+          ignoredDependencies: [],
+          ignoredFiles: [
+            '{projectRoot}/eslint.config.{js,cjs,mjs}',
+            '{projectRoot}/vite.config.{js,ts,mjs,mts}',
+          ],
+        },
+      ],
+    },
+  },
 ]

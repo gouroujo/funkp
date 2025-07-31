@@ -18,13 +18,11 @@
     "dist",
     "!**/*.tsbuildinfo"
   ],
-  "dependencies": {
-    "vite": "^6.0.0"
-  },
+  "dependencies": {},
   "nx": {
     "targets": {
       "build": {
-        "executor": "@nx/esbuild:esbuild",
+        "executor": "@nx/vite:build",
         "outputs": [
           "{options.outputPath}"
         ],

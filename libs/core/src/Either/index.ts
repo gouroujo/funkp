@@ -1,8 +1,9 @@
+export * from './bimap'
 export * from './isLeft'
 export * from './isRight'
+export * from './left'
 export * from './mapRight'
 export * from './right'
-export * from './left'
 
 export interface Left<L> {
   readonly _tag: 'Left'
