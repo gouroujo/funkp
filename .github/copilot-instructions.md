@@ -20,6 +20,9 @@
 - Prefer pure functions and type safety; see `libs/core/src/Either/` for examples.
 - Each module is documented with TSDoc and usage examples.
 - Tests are colocated in the same file, guarded by `if (import.meta.vitest)` blocks.
+- functions are curried by default, allowing partial application and composition.
+- export functions in the index file of each module for easy import.
+- export each module as a named export in `main.ts` and as a separate export in `package.json`. Update vite config to include these entrypoint.
 
 ## Conventions
 

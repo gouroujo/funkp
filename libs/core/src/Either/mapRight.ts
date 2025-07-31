@@ -2,7 +2,6 @@ import { Either, left } from '.'
 import { isRight } from './isRight'
 import { right } from './right'
 
-
 /**
  * Maps a function over the `Right` value of an `Either`.
  *
@@ -12,32 +11,35 @@ import { right } from './right'
  * @typeParam L - Type of the Left value
  * @typeParam R - Type of the original Right value
  * @typeParam R2 - Type of the mapped Right value
- * @param either - The `Either` to map over
- * @param mapFunction - The function to apply to the `Right` value
- * @returns A new `Either` with the mapped `Right` value, or the original `Left` value if it exists
+ * @param mapFn - The function to apply to the `Right` value
+ * @returns A function that takes an `Either` and returns a mapped `Either`
  *
  * @example
  * ```typescript
  * import { mapRight, right, left, Either } from './mapRight'
  *
+ * const double = (n: number) => n * 2
+ * const mapR = mapRight(double)
+ *
  * const r: Either<string, number> = right(10)
  * const l: Either<string, number> = left('fail')
  *
- * const mappedR = mapRight(r, n => n * 2)
+ * const mappedR = mapR(r)
  * // mappedR is { _tag: 'Right', right: 20 }
  *
- * const mappedL = mapRight(l, n => n * 2)
+ * const mappedL = mapR(l)
  * // mappedL is { _tag: 'Left', left: 'fail' }
  * ```
  */
-export const mapRight = <L = never, R = never, R2 = never>(
-  either: Either<L, R>,
-  mapFunction: (r: R) => R2,
-): Either<L, R2> => {
-  if (isRight(either)) {
-    return right(mapFunction(either.right))
+export function mapRight<L = never, R = never, R2 = never>(
+  mapFn: (r: R) => R2,
+): (either: Either<L, R>) => Either<L, R2> {
+  return (either) => {
+    if (isRight(either)) {
+      return right(mapFn(either.right))
+    }
+    return either
   }
-  return either
 }
 
 /**
@@ -46,16 +48,18 @@ export const mapRight = <L = never, R = never, R2 = never>(
  * @typeParam L - Type of the Left value
  * @typeParam R - Type of the original Right value
  * @typeParam R2 - Type of the mapped Right value
- * @param either - The `Either` to map over
- * @param mapFunction - The function to apply to the `Right` value
- * @returns A new `Either` with the mapped `Right` value, or the original `Left` value if it exists
+ * @param mapFn - The function to apply to the `Right` value
+ * @returns A function that takes an `Either` and returns a mapped `Either`
  *
  * @example
  * ```typescript
  * import { map, right, left, Either } from './mapRight'
  *
+ * const inc = (n: number) => n + 1
+ * const mapInc = map(inc)
+ *
  * const r: Either<string, number> = right(5)
- * const mapped = map(r, n => n + 1)
+ * const mapped = mapInc(r)
  * // mapped is { _tag: 'Right', right: 6 }
  * ```
  */
@@ -65,14 +69,16 @@ if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
 
   it('should map Right value', () => {
-    const r = right(42)
-    const result = mapRight(r, (r) => r * 2)
+    const r: Either<never, number> = right(42)
+    const mapR = mapRight((r: number) => r * 2)
+    const result = mapR(r)
     expect(result).toEqual({ _tag: 'Right', right: 84 })
   })
 
   it('should return Left unchanged', () => {
-    const l = left('error')
-    const result = mapRight(l, (r) => r * 2)
+    const l: Either<never, never> = left(undefined as never)
+    const mapR = mapRight((r: never) => r)
+    const result = mapR(l)
     expect(result).toEqual(l)
   })
 }
