@@ -1,4 +1,4 @@
-import { Either } from '.'
+import { Either, left } from '.'
 import { isRight } from './isRight'
 import { right } from './right'
 
@@ -9,7 +9,7 @@ import { right } from './right'
  * @param f - The function to apply to the Right value.
  * @returns A new Either with the mapped Right value, or the original Left value if it exists.
  */
-export const mapRight = <L, R, R2>(
+export const mapRight = <L = never, R = never, R2 = never>(
   either: Either<L, R>,
   f: (r: R) => R2,
 ): Either<L, R2> => {
@@ -33,8 +33,8 @@ if (import.meta.vitest) {
   })
 
   it('should return Left unchanged', () => {
-    const left: Either<string, number> = { _tag: 'Left', left: 'error' }
-    const result = mapRight(left as Either<string, number>, (r) => r * 2)
-    expect(result).toEqual(left)
+    const l = left('error')
+    const result = mapRight(l, (r) => r * 2)
+    expect(result).toEqual(l)
   })
 }
