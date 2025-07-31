@@ -7,9 +7,6 @@
       "path": "../../libs/core"
     },
     {
-      "path": "../../libs/ollama"
-    },
-    {
       "path": "./tsconfig.build.json"
     }
   ]

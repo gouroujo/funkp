@@ -11,9 +11,6 @@
   "references": [
     {
       "path": "../../libs/core/tsconfig.build.json"
-    },
-    {
-      "path": "../../libs/ollama/tsconfig.build.json"
     }
   ]
 }

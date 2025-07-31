@@ -1,68 +1,59 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Last } from 'src/utils/array/types'
-import { UnaryFunction } from 'src/utils/function/types'
+import { AnyFunc, UnaryFunction } from 'src/utils/function/types'
 
-type PipeFns<
-  P,
+type FlowFns<
   Fns extends UnaryFunction[],
   Prev extends UnaryFunction[] = [never, ...Fns],
 > = {
   [I in keyof Fns]: Fns[I] extends UnaryFunction
-    ? I extends '0'
-      ? (arg: P) => ReturnType<Fns[I]>
-      : (
-          arg: I extends keyof Prev ? ReturnType<Prev[I]> : unknown,
-        ) => ReturnType<Fns[I]>
+    ? (
+        arg: I extends keyof Prev ? ReturnType<Prev[I]> : unknown,
+      ) => ReturnType<Fns[I]>
     : Fns[I]
 }
 
-export function pipe<TIn, T1, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+export function flow<TIn extends any[], T1, TOut>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<TIn extends any[], T1, T2, TOut>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<TIn extends any[], T1, T2, T3, TOut>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, T4, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<TIn extends any[], T1, T2, T3, T4, TOut>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
   f4: UnaryFunction<T4, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, T4, T5, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<TIn extends any[], T1, T2, T3, T4, T5, TOut>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
   f4: UnaryFunction<T4, T5>,
   f5: UnaryFunction<T5, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, T4, T5, T6, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, TOut>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
   f4: UnaryFunction<T4, T5>,
   f5: UnaryFunction<T5, T6>,
   f6: UnaryFunction<T6, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, T7, TOut>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -70,10 +61,9 @@ export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, TOut>(
   f5: UnaryFunction<T5, T6>,
   f6: UnaryFunction<T6, T7>,
   f7: UnaryFunction<T7, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, T8, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, T7, T8, TOut>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -82,10 +72,21 @@ export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, T8, TOut>(
   f6: UnaryFunction<T6, T7>,
   f7: UnaryFunction<T7, T8>,
   f8: UnaryFunction<T8, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, T8, T9, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
+  T1,
+  T2,
+  T3,
+  T4,
+  T5,
+  T6,
+  T7,
+  T8,
+  T9,
+  TOut,
+>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -95,10 +96,22 @@ export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, T8, T9, TOut>(
   f7: UnaryFunction<T7, T8>,
   f8: UnaryFunction<T8, T9>,
   f9: UnaryFunction<T9, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
+  T1,
+  T2,
+  T3,
+  T4,
+  T5,
+  T6,
+  T7,
+  T8,
+  T9,
+  T10,
+  TOut,
+>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -109,10 +122,23 @@ export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TOut>(
   f8: UnaryFunction<T8, T9>,
   f9: UnaryFunction<T9, T10>,
   f10: UnaryFunction<T10, TOut>,
-): TOut
-export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TOut>(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
+  T1,
+  T2,
+  T3,
+  T4,
+  T5,
+  T6,
+  T7,
+  T8,
+  T9,
+  T10,
+  T11,
+  TOut,
+>(
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -124,9 +150,9 @@ export function pipe<TIn, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TOut>(
   f9: UnaryFunction<T9, T10>,
   f10: UnaryFunction<T10, T11>,
   f11: UnaryFunction<T11, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -141,8 +167,7 @@ export function pipe<
   T12,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -155,9 +180,9 @@ export function pipe<
   f10: UnaryFunction<T10, T11>,
   f11: UnaryFunction<T11, T12>,
   f12: UnaryFunction<T12, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -173,8 +198,7 @@ export function pipe<
   T13,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -188,9 +212,9 @@ export function pipe<
   f11: UnaryFunction<T11, T12>,
   f12: UnaryFunction<T12, T13>,
   f13: UnaryFunction<T13, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -207,8 +231,7 @@ export function pipe<
   T14,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -223,9 +246,9 @@ export function pipe<
   f12: UnaryFunction<T12, T13>,
   f13: UnaryFunction<T13, T14>,
   f14: UnaryFunction<T14, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -243,8 +266,7 @@ export function pipe<
   T15,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -260,9 +282,9 @@ export function pipe<
   f13: UnaryFunction<T13, T14>,
   f14: UnaryFunction<T14, T15>,
   f15: UnaryFunction<T15, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -281,8 +303,7 @@ export function pipe<
   T16,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -299,9 +320,9 @@ export function pipe<
   f14: UnaryFunction<T14, T15>,
   f15: UnaryFunction<T15, T16>,
   f16: UnaryFunction<T16, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -321,8 +342,7 @@ export function pipe<
   T17,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -340,9 +360,9 @@ export function pipe<
   f15: UnaryFunction<T15, T16>,
   f16: UnaryFunction<T16, T17>,
   f17: UnaryFunction<T17, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -363,8 +383,7 @@ export function pipe<
   T18,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -383,9 +402,9 @@ export function pipe<
   f16: UnaryFunction<T16, T17>,
   f17: UnaryFunction<T17, T18>,
   f18: UnaryFunction<T18, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -407,8 +426,7 @@ export function pipe<
   T19,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -428,9 +446,9 @@ export function pipe<
   f17: UnaryFunction<T17, T18>,
   f18: UnaryFunction<T18, T19>,
   f19: UnaryFunction<T19, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -453,8 +471,7 @@ export function pipe<
   T20,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -475,9 +492,9 @@ export function pipe<
   f18: UnaryFunction<T18, T19>,
   f19: UnaryFunction<T19, T20>,
   f20: UnaryFunction<T20, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -501,8 +518,7 @@ export function pipe<
   T21,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -524,9 +540,9 @@ export function pipe<
   f19: UnaryFunction<T19, T20>,
   f20: UnaryFunction<T20, T21>,
   f21: UnaryFunction<T21, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -551,8 +567,7 @@ export function pipe<
   T22,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -575,9 +590,9 @@ export function pipe<
   f20: UnaryFunction<T20, T21>,
   f21: UnaryFunction<T21, T22>,
   f22: UnaryFunction<T22, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -603,8 +618,7 @@ export function pipe<
   T23,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -628,9 +642,9 @@ export function pipe<
   f21: UnaryFunction<T21, T22>,
   f22: UnaryFunction<T22, T23>,
   f23: UnaryFunction<T23, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -657,8 +671,7 @@ export function pipe<
   T24,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -683,9 +696,9 @@ export function pipe<
   f22: UnaryFunction<T22, T23>,
   f23: UnaryFunction<T23, T24>,
   f24: UnaryFunction<T24, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -713,8 +726,7 @@ export function pipe<
   T25,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -740,9 +752,9 @@ export function pipe<
   f23: UnaryFunction<T23, T24>,
   f24: UnaryFunction<T24, T25>,
   f25: UnaryFunction<T25, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -771,8 +783,7 @@ export function pipe<
   T26,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -799,9 +810,9 @@ export function pipe<
   f24: UnaryFunction<T24, T25>,
   f25: UnaryFunction<T25, T26>,
   f26: UnaryFunction<T26, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -831,8 +842,7 @@ export function pipe<
   T27,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -860,9 +870,9 @@ export function pipe<
   f25: UnaryFunction<T25, T26>,
   f26: UnaryFunction<T26, T27>,
   f27: UnaryFunction<T27, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -893,8 +903,7 @@ export function pipe<
   T28,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -923,9 +932,9 @@ export function pipe<
   f26: UnaryFunction<T26, T27>,
   f27: UnaryFunction<T27, T28>,
   f28: UnaryFunction<T28, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -957,8 +966,7 @@ export function pipe<
   T29,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -988,9 +996,9 @@ export function pipe<
   f27: UnaryFunction<T27, T28>,
   f28: UnaryFunction<T28, T29>,
   f29: UnaryFunction<T29, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1023,8 +1031,7 @@ export function pipe<
   T30,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1055,9 +1062,9 @@ export function pipe<
   f28: UnaryFunction<T28, T29>,
   f29: UnaryFunction<T29, T30>,
   f30: UnaryFunction<T30, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1091,8 +1098,7 @@ export function pipe<
   T31,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1124,9 +1130,9 @@ export function pipe<
   f29: UnaryFunction<T29, T30>,
   f30: UnaryFunction<T30, T31>,
   f31: UnaryFunction<T31, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1161,8 +1167,7 @@ export function pipe<
   T32,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1195,9 +1200,9 @@ export function pipe<
   f30: UnaryFunction<T30, T31>,
   f31: UnaryFunction<T31, T32>,
   f32: UnaryFunction<T32, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1233,8 +1238,7 @@ export function pipe<
   T33,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1268,9 +1272,9 @@ export function pipe<
   f31: UnaryFunction<T31, T32>,
   f32: UnaryFunction<T32, T33>,
   f33: UnaryFunction<T33, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1307,8 +1311,7 @@ export function pipe<
   T34,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1343,9 +1346,9 @@ export function pipe<
   f32: UnaryFunction<T32, T33>,
   f33: UnaryFunction<T33, T34>,
   f34: UnaryFunction<T34, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1383,8 +1386,7 @@ export function pipe<
   T35,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1420,9 +1422,9 @@ export function pipe<
   f33: UnaryFunction<T33, T34>,
   f34: UnaryFunction<T34, T35>,
   f35: UnaryFunction<T35, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1461,8 +1463,7 @@ export function pipe<
   T36,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1499,9 +1500,9 @@ export function pipe<
   f34: UnaryFunction<T34, T35>,
   f35: UnaryFunction<T35, T36>,
   f36: UnaryFunction<T36, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1541,8 +1542,7 @@ export function pipe<
   T37,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1580,9 +1580,9 @@ export function pipe<
   f35: UnaryFunction<T35, T36>,
   f36: UnaryFunction<T36, T37>,
   f37: UnaryFunction<T37, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1623,8 +1623,7 @@ export function pipe<
   T38,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1663,9 +1662,9 @@ export function pipe<
   f36: UnaryFunction<T36, T37>,
   f37: UnaryFunction<T37, T38>,
   f38: UnaryFunction<T38, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1707,8 +1706,7 @@ export function pipe<
   T39,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1748,9 +1746,9 @@ export function pipe<
   f37: UnaryFunction<T37, T38>,
   f38: UnaryFunction<T38, T39>,
   f39: UnaryFunction<T39, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1793,8 +1791,7 @@ export function pipe<
   T40,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1835,9 +1832,9 @@ export function pipe<
   f38: UnaryFunction<T38, T39>,
   f39: UnaryFunction<T39, T40>,
   f40: UnaryFunction<T40, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1881,8 +1878,7 @@ export function pipe<
   T41,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -1924,9 +1920,9 @@ export function pipe<
   f39: UnaryFunction<T39, T40>,
   f40: UnaryFunction<T40, T41>,
   f41: UnaryFunction<T41, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -1971,8 +1967,7 @@ export function pipe<
   T42,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2015,9 +2010,9 @@ export function pipe<
   f40: UnaryFunction<T40, T41>,
   f41: UnaryFunction<T41, T42>,
   f42: UnaryFunction<T42, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2063,8 +2058,7 @@ export function pipe<
   T43,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2108,9 +2102,9 @@ export function pipe<
   f41: UnaryFunction<T41, T42>,
   f42: UnaryFunction<T42, T43>,
   f43: UnaryFunction<T43, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2157,8 +2151,7 @@ export function pipe<
   T44,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2203,9 +2196,9 @@ export function pipe<
   f42: UnaryFunction<T42, T43>,
   f43: UnaryFunction<T43, T44>,
   f44: UnaryFunction<T44, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2253,8 +2246,7 @@ export function pipe<
   T45,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2300,9 +2292,9 @@ export function pipe<
   f43: UnaryFunction<T43, T44>,
   f44: UnaryFunction<T44, T45>,
   f45: UnaryFunction<T45, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2351,8 +2343,7 @@ export function pipe<
   T46,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2399,9 +2390,9 @@ export function pipe<
   f44: UnaryFunction<T44, T45>,
   f45: UnaryFunction<T45, T46>,
   f46: UnaryFunction<T46, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2451,8 +2442,7 @@ export function pipe<
   T47,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2500,9 +2490,9 @@ export function pipe<
   f45: UnaryFunction<T45, T46>,
   f46: UnaryFunction<T46, T47>,
   f47: UnaryFunction<T47, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2553,8 +2543,7 @@ export function pipe<
   T48,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2603,9 +2592,9 @@ export function pipe<
   f46: UnaryFunction<T46, T47>,
   f47: UnaryFunction<T47, T48>,
   f48: UnaryFunction<T48, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2657,8 +2646,7 @@ export function pipe<
   T49,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2708,9 +2696,9 @@ export function pipe<
   f47: UnaryFunction<T47, T48>,
   f48: UnaryFunction<T48, T49>,
   f49: UnaryFunction<T49, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2763,8 +2751,7 @@ export function pipe<
   T50,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2815,9 +2802,9 @@ export function pipe<
   f48: UnaryFunction<T48, T49>,
   f49: UnaryFunction<T49, T50>,
   f50: UnaryFunction<T50, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2871,8 +2858,7 @@ export function pipe<
   T51,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -2924,9 +2910,9 @@ export function pipe<
   f49: UnaryFunction<T49, T50>,
   f50: UnaryFunction<T50, T51>,
   f51: UnaryFunction<T51, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -2981,8 +2967,7 @@ export function pipe<
   T52,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3035,9 +3020,9 @@ export function pipe<
   f50: UnaryFunction<T50, T51>,
   f51: UnaryFunction<T51, T52>,
   f52: UnaryFunction<T52, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -3093,8 +3078,7 @@ export function pipe<
   T53,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3148,9 +3132,9 @@ export function pipe<
   f51: UnaryFunction<T51, T52>,
   f52: UnaryFunction<T52, T53>,
   f53: UnaryFunction<T53, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -3207,8 +3191,7 @@ export function pipe<
   T54,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3263,9 +3246,9 @@ export function pipe<
   f52: UnaryFunction<T52, T53>,
   f53: UnaryFunction<T53, T54>,
   f54: UnaryFunction<T54, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -3323,8 +3306,7 @@ export function pipe<
   T55,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3380,9 +3362,9 @@ export function pipe<
   f53: UnaryFunction<T53, T54>,
   f54: UnaryFunction<T54, T55>,
   f55: UnaryFunction<T55, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -3441,8 +3423,7 @@ export function pipe<
   T56,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3499,9 +3480,9 @@ export function pipe<
   f54: UnaryFunction<T54, T55>,
   f55: UnaryFunction<T55, T56>,
   f56: UnaryFunction<T56, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -3561,8 +3542,7 @@ export function pipe<
   T57,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3620,9 +3600,9 @@ export function pipe<
   f55: UnaryFunction<T55, T56>,
   f56: UnaryFunction<T56, T57>,
   f57: UnaryFunction<T57, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -3683,8 +3663,7 @@ export function pipe<
   T58,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3743,9 +3722,9 @@ export function pipe<
   f56: UnaryFunction<T56, T57>,
   f57: UnaryFunction<T57, T58>,
   f58: UnaryFunction<T58, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -3807,8 +3786,7 @@ export function pipe<
   T59,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3868,9 +3846,9 @@ export function pipe<
   f57: UnaryFunction<T57, T58>,
   f58: UnaryFunction<T58, T59>,
   f59: UnaryFunction<T59, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -3933,8 +3911,7 @@ export function pipe<
   T60,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -3995,9 +3972,9 @@ export function pipe<
   f58: UnaryFunction<T58, T59>,
   f59: UnaryFunction<T59, T60>,
   f60: UnaryFunction<T60, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -4061,8 +4038,7 @@ export function pipe<
   T61,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -4124,9 +4100,9 @@ export function pipe<
   f59: UnaryFunction<T59, T60>,
   f60: UnaryFunction<T60, T61>,
   f61: UnaryFunction<T61, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -4191,8 +4167,7 @@ export function pipe<
   T62,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -4255,9 +4230,9 @@ export function pipe<
   f60: UnaryFunction<T60, T61>,
   f61: UnaryFunction<T61, T62>,
   f62: UnaryFunction<T62, TOut>,
-): TOut
-export function pipe<
-  TIn,
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
   T1,
   T2,
   T3,
@@ -4323,8 +4298,7 @@ export function pipe<
   T63,
   TOut,
 >(
-  arg: TIn,
-  f0: UnaryFunction<TIn, T1>,
+  f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
@@ -4388,28 +4362,122 @@ export function pipe<
   f61: UnaryFunction<T61, T62>,
   f62: UnaryFunction<T62, T63>,
   f63: UnaryFunction<T63, TOut>,
-): TOut
-export function pipe<P, Fns extends [UnaryFunction<P>, ...UnaryFunction[]]>(
-  arg: P,
-  ...fns: PipeFns<P, Fns> extends Fns ? Fns : PipeFns<P, Fns>
-): ReturnType<Last<Fns>>
-export function pipe<P, Fns extends [UnaryFunction<P>, ...UnaryFunction[]]>(
-  arg: P,
-  ...fns: PipeFns<P, Fns> extends Fns ? Fns : PipeFns<P, Fns>
-): ReturnType<Last<Fns>> {
-  return fns.reduce((acc, fn) => fn(acc), arg) as ReturnType<Last<Fns>>
+): AnyFunc<TIn, TOut>
+export function flow<
+  TIn extends any[],
+  F1 extends AnyFunc<TIn>,
+  Fns extends UnaryFunction[],
+>(
+  f1: F1,
+  ...fns: FlowFns<Fns> extends Fns ? Fns : FlowFns<Fns>
+): AnyFunc<TIn, ReturnType<Last<Fns>>>
+export function flow<
+  TIn extends any[],
+  F1 extends AnyFunc<TIn>,
+  Fns extends UnaryFunction[],
+>(
+  f1: F1,
+  ...fns: FlowFns<Fns> extends Fns ? Fns : FlowFns<Fns>
+): AnyFunc<TIn, ReturnType<Last<Fns>>> {
+  return (...args: TIn) => fns.reduce((acc, fn) => fn(acc), f1(...args))
 }
 
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
 
-  it('should apply functions in sequence', () => {
-    const result = pipe(
-      'hello',
-      (s) => s.length,
+  it('should combine functions in sequence', () => {
+    const fn = flow(
+      (s: string) => s.length,
       (n) => n * 2,
       (n) => n.toString(),
     )
-    expect(result).toBe('10')
+    expect(fn('hello')).toBe('10')
+  })
+
+  it('should still work with 80 functions in sequence', () => {
+    const f = (n: number) => n + 1
+    const fn = flow(
+      (s: string) => s.length,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      f,
+      (n) => n.toString(),
+    )
+    expect(fn('a')).toBe('79')
   })
 }

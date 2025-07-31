@@ -10,8 +10,8 @@
     ".": {
       "development": "./src/main.ts",
       "types": "./dist/main.d.ts",
-      "import": "./dist/main.mjs",
-      "default": "./dist/main.cjs"
+      "import": "./dist/main.es.js",
+      "default": "./dist/main.cjs.js"
     }
   },
   "files": [
