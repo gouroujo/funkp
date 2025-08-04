@@ -29,26 +29,6 @@ type Requirement = {
   value: any
 }
 
-const effect1: SyncEffect<'effect1', never, never> = {
-  _tag: 'effect' as const,
-  *[Symbol.iterator]() {
-    return 'effect1' as const
-  },
-  async *[Symbol.asyncIterator]() {
-    return 'effect1' as const
-  },
-}
-
-const effect2: SyncEffect<'effect2', 'failure', 'context'> = {
-  _tag: 'effect' as const,
-  *[Symbol.iterator]() {
-    return 'effect2' as const
-  },
-  async *[Symbol.asyncIterator]() {
-    return 'effect2' as const
-  },
-}
-
 function gen<Success, Failure>(
   genFn: () => Generator<Left<Failure>, Success, never>,
 ): SyncEffect<Success, Failure> {
@@ -79,12 +59,6 @@ function asyncgen<Success, Failure>(
   }
 }
 
-const effect3 = gen(function* () {
-  const a = yield* effect1
-  const b = yield* effect2
-  return `Combined: ${a}, ${b}` as const
-})
-
 function fail<E>(error: E): SyncEffect<never, E, never> {
   return gen(function* () {
     return yield left(error)
@@ -102,8 +76,21 @@ function promise<Success>(
 ): Effect<Success, never, never> {
   return asyncgen(async function* () {
     const result = await promiseFn()
-    const c = yield* succeed(42)
     return result
+  })
+}
+
+function tryPromise<Success, Failure>(
+  promiseFn: () => Promise<Success>,
+  catchFn: (error: unknown) => Failure,
+): Effect<Success, Failure, never> {
+  return asyncgen(async function* () {
+    try {
+      const result = await promiseFn()
+      return result
+    } catch (error) {
+      return yield left(catchFn(error))
+    }
   })
 }
 
@@ -140,8 +127,15 @@ if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
 
   describe('Synchronous Effect', () => {
-    it('should run sync', () => {
-      const result = runSync(effect3)
+    it('should combine effect', () => {
+      const effect1 = succeed('effect1')
+      const effect2 = succeed('effect2')
+      const combined = gen(function* () {
+        const a = yield* effect1
+        const b = yield* effect2
+        return `Combined: ${a}, ${b}` as const
+      })
+      const result = runSync(combined)
       expect(result).toEqual({
         _tag: 'Right',
         right: 'Combined: effect1, effect2',
@@ -163,6 +157,28 @@ if (import.meta.vitest) {
       const effect = promise(() => Promise.resolve('async result'))
       const result = await runAsync(effect)
       expect(result).toEqual({ _tag: 'Right', right: 'async result' })
+    })
+    it('should handle async failure', async () => {
+      const effect = tryPromise(
+        () => Promise.reject('async error'),
+        (error) => 'error: ' + error,
+      )
+      const result = await runAsync(effect)
+      expect(result).toEqual({ _tag: 'Left', left: 'error: async error' })
+    })
+    it('combine with sync effect', async () => {
+      const syncEffect = succeed('effect1')
+      const asyncEffect = promise(() => Promise.resolve('async part'))
+      const effect = asyncgen(async function* () {
+        const syncResult = yield* syncEffect
+        const asyncResult = yield* asyncEffect
+        return `Combined: ${syncResult}, ${asyncResult}` as const
+      })
+      const result = await runAsync(effect)
+      expect(result).toEqual({
+        _tag: 'Right',
+        right: 'Combined: effect1, async part',
+      })
     })
   })
 }
