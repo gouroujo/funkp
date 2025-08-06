@@ -1,21 +1,28 @@
 /* eslint-disable require-yield */
 
-import { Either, isLeft, left, Left, right } from '../Either'
+import { A } from 'vitest/dist/chunks/environment.d.cL3nLXbE.js'
+import { Either, isLeft, left, Left, LeftType, right } from '../Either'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Effect<Success, Error = never, Requirements = never> {
   // effect: () => Generator<Success>
   _tag: 'effect'
-  [Symbol.asyncIterator]: () => AsyncGenerator<Left<Error>, Success, any>
+  [Symbol.asyncIterator]: () => AsyncGenerator<
+    Left<Error> | Requirements,
+    Success,
+    any
+  >
 }
 export interface SyncEffect<Success, Error = never, Requirements = never>
   extends Effect<Success, Error, Requirements> {
-  [Symbol.iterator]: () => Generator<Left<Error>, Success, any>
+  [Symbol.iterator]: () => Generator<Left<Error> | Requirements, Success, any>
 }
 
 type GeneratorYield<T extends Generator> =
   T extends Generator<infer Y, any, any> ? Y : never
 type FilterEffect<T> = T extends Effect<any, any, any> ? T : never
+type FilterLeft<T> = T extends Left<any> ? T : never
+type FilterRequirement<T> = T extends Requirement ? T : never
 
 export type Success<T extends Effect<any, any, any>> =
   T extends Effect<infer S, any, any> ? S : never
@@ -24,14 +31,49 @@ type Error<T extends Effect<any, any, any>> =
 type Context<T extends Effect<any, any, any>> =
   T extends Effect<any, any, infer C> ? C : never
 
-type Requirement = {
+type Requirement<Shape = any> = {
   _tag: 'requirement'
-  value: any
+  // id: string
 }
+const s = Symbol.for('requirement')
 
-function gen<Success, Failure>(
-  genFn: () => Generator<Left<Failure>, Success, never>,
-): SyncEffect<Success, Failure> {
+const test =
+  (id: string) =>
+  <Self, Shape>() => {
+    return class {
+      _tag = 'requirement' as const
+      static id = id
+      static *[Symbol.iterator](): Generator<Self, Shape, Shape> {
+        const value = yield { _tag: 'requirement', id } as Self
+        return value
+      }
+    }
+  }
+
+class Random extends test('MyRandomService')<
+  Random,
+  { readonly next: SyncEffect<number> }
+>() {}
+
+type RequirementService<T> = T extends Requirement<infer S> ? S : never
+const isRequirement = (value: any): value is Requirement =>
+  value && value._tag === 'requirement'
+
+// const makeRequirement = <Service>(name: string): Requirement<Service> => ({
+//   _tag: 'requirement',
+//   [Symbol.iterator]: function* () {
+//     const service = yield name
+//     return service
+//   },
+// })
+
+export const isSync = <S, E, R>(
+  effect: Effect<S, E, R>,
+): effect is SyncEffect<S, E, R> => '[Symbol.iterator]' in effect
+
+function gen<Success, Y extends Left<any> | Requirement = never, R = any>(
+  genFn: () => Generator<Y, Success, R>,
+): SyncEffect<Success, LeftType<FilterLeft<Y>>, FilterRequirement<Y>> {
   return {
     _tag: 'effect',
     [Symbol.iterator]: genFn,
@@ -39,20 +81,26 @@ function gen<Success, Failure>(
       const iterator = genFn()
       let result = iterator.next()
       while (!result.done) {
-        if (isLeft(result.value)) {
-          yield result.value
-        } else {
-          yield left(result.value)
-        }
+        // if (isLeft(result.value)) {
+        //   yield result.value as FilterLeft<Y>
+        // } else if (isRequirement(result.value)) {
+        //   yield result.value as FilterRequirement<Y>
+        // }
+        yield result.value as FilterLeft<Y> | FilterRequirement<Y>
+        // yield result.value as Left<Error>
         result = iterator.next()
       }
       return result.value
     },
   }
 }
-function asyncgen<Success, Failure>(
-  genFn: () => AsyncGenerator<Left<Failure>, Awaited<Success>, never>,
-): Effect<Success, Failure> {
+function asyncgen<Success, Failure, Requirements extends Requirement>(
+  genFn: () => AsyncGenerator<
+    Left<Failure> | Requirements,
+    Awaited<Success>,
+    never
+  >,
+): Effect<Success, Failure, Requirements> {
   return {
     _tag: 'effect',
     [Symbol.asyncIterator]: genFn,
@@ -60,7 +108,7 @@ function asyncgen<Success, Failure>(
 }
 
 function fail<E>(error: E): SyncEffect<never, E, never> {
-  return gen(function* () {
+  return gen<never, Left<E>, never>(function* () {
     return yield left(error)
   })
 }
@@ -103,7 +151,7 @@ function runSync<Success, Failure>(
     if (isLeft(result.value)) {
       return result.value
     }
-    result = iterator.next(result.value)
+    result = iterator.next()
   }
   return right(result.value)
 }
@@ -117,28 +165,89 @@ function runAsync<Success, Failure>(
       if (isLeft(result.value)) {
         return result.value
       }
-      result = await iterator.next(result.value)
+      result = await iterator.next()
     }
     return right(result.value)
   })()
 }
 
+export function provide<Impl, R extends Requirement<Impl>>(
+  requirement: R,
+  implementation: Impl,
+): <S, E, A>(effect: SyncEffect<S, E, A>) => SyncEffect<S, E, Exclude<A, R>> {
+  return (effect) => {
+    return gen(function* () {
+      const iterator = effect[Symbol.iterator]()
+      let result = iterator.next()
+      while (!result.done) {
+        if (isRequirement(result.value) && result.value.id === requirement.id) {
+          result = iterator.next(implementation)
+        } else {
+          yield result.value as Left<any> | A
+          result = iterator.next()
+        }
+      }
+      return result.value
+    })
+  }
+}
+
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
+  const { describe, it, expect, expectTypeOf } = import.meta.vitest
 
   describe('Synchronous Effect', () => {
     it('should combine effect', () => {
-      const effect1 = succeed('effect1')
-      const effect2 = succeed('effect2')
+      const effect1 = succeed('effect1' as const)
+      const effect2 = succeed('effect2' as const)
       const combined = gen(function* () {
         const a = yield* effect1
         const b = yield* effect2
         return `Combined: ${a}, ${b}` as const
       })
+      expectTypeOf(combined).toEqualTypeOf<
+        SyncEffect<'Combined: effect1, effect2', never, never>
+      >()
       const result = runSync(combined)
       expect(result).toEqual({
         _tag: 'Right',
         right: 'Combined: effect1, effect2',
+      })
+    })
+    it('should combine effect that fail', () => {
+      const effect1 = fail('failure' as const)
+      const effect2 = succeed('effect2' as const)
+      const combined = gen(function* () {
+        const a = yield* effect1
+        const b = yield* effect2
+        return `Combined: ${a}, ${b}` as const
+      })
+      expectTypeOf(combined).toEqualTypeOf<
+        SyncEffect<never, 'failure', never>
+      >()
+      const result = runSync(combined)
+      expect(result).toEqual({
+        _tag: 'Left',
+        left: 'failure',
+      })
+    })
+    it('should combine effect that could fail', () => {
+      const effect1 = gen(function* () {
+        yield left('failure' as const)
+        return 'effect1' as const
+      })
+      const effect2 = succeed('effect2' as const)
+      const combined = gen(function* () {
+        const a = yield* effect1
+        const b = yield* effect2
+        return `Combined: ${a}, ${b}` as const
+      })
+      expectTypeOf(combined).toEqualTypeOf<
+        SyncEffect<'Combined: effect1, effect2', 'failure', never>
+      >()
+      const result = runSync(combined)
+      expect(result).toEqual({
+        _tag: 'Left',
+        left: 'failure',
       })
     })
 
@@ -149,6 +258,19 @@ if (import.meta.vitest) {
     it('should fail with error', () => {
       const result = runSync(fail('error'))
       expect(result).toEqual({ _tag: 'Left', left: 'error' })
+    })
+    it('should use requirements', () => {
+      const effect = gen(function* () {
+        const req = yield* Random
+        const value = yield* req.next
+        return `Requirement: ${value}`
+      })
+      const provided = provide(Random, { next: succeed(3) })(effect)
+      const result = runSync(provided)
+      expect(result).toEqual({
+        _tag: 'Right',
+        right: 'Requirement: 3',
+      })
     })
   })
 
