@@ -4,9 +4,9 @@ import { gen } from './gen'
 import { run } from './run'
 
 export function fail<E>(error: E): SyncEffect<never, E, never> {
-  return gen<never, Left<E>, never>(function* () {
-    return yield left(error)
-  })
+  return gen(function* (): Generator<Left<E>> {
+    yield left(error)
+  }) as SyncEffect<never, E, never>
 }
 if (import.meta.vitest) {
   const { it, expect, expectTypeOf } = import.meta.vitest

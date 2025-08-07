@@ -1,20 +1,21 @@
 import { Effect } from '.'
 import { left } from '../Either'
-import { asyncgen } from './gen'
+import { gen } from './gen'
 import { run } from './run'
 
 export function tryPromise<Success, Failure>(
   promiseFn: () => Promise<Success>,
   catchFn: (error: unknown) => Failure,
 ): Effect<Success, Failure, never> {
-  return asyncgen(async function* () {
+  return gen(async function* () {
     try {
       const result = await promiseFn()
       return result
     } catch (error) {
-      return yield left(catchFn(error))
+      yield left(catchFn(error))
     }
-  })
+    return
+  }) as Effect<Success, Failure, never>
 }
 
 if (import.meta.vitest) {
@@ -24,7 +25,7 @@ if (import.meta.vitest) {
     it('should handle async failure', async () => {
       const effect = tryPromise(
         () => Promise.reject('async error'),
-        (error) => 'error' + error,
+        (error) => 'error: ' + error,
       )
       expectTypeOf(effect).toEqualTypeOf<Effect<never, string, never>>()
       const result = await run(effect)

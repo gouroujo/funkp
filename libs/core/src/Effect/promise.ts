@@ -1,12 +1,12 @@
 import { Effect } from '.'
-import { asyncgen } from './gen'
+import { gen } from './gen'
 import { run } from './run'
 
 export function promise<Success>(
   promiseFn: () => Promise<Success>,
 ): Effect<Success, never, never> {
   // eslint-disable-next-line require-yield
-  return asyncgen(async function* () {
+  return gen(async function* () {
     const result = await promiseFn()
     return result
   })

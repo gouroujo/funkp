@@ -1,5 +1,6 @@
 import { Effect, SyncEffect } from '.'
 import { left, Left, LeftType } from '../Either'
+import { isIterable } from '../utils/iterable/isIterable'
 import { promise } from './promise'
 import { run } from './run'
 import { Requirement } from './service'
@@ -7,43 +8,67 @@ import { Requirement } from './service'
 type FilterLeft<T> = T extends Left<unknown> ? T : never
 type FilterRequirement<T> = T extends Requirement ? T : never
 
-export function gen<
+export function gen<Success, YieldedValues extends Left | Requirement = never>(
+  genFn: () => Generator<YieldedValues, Success>,
+): SyncEffect<
   Success,
-  Y extends Left<any> | Requirement = never,
-  R = any,
->(
-  genFn: () => Generator<Y, Success, R>,
-): SyncEffect<Success, LeftType<FilterLeft<Y>>, FilterRequirement<Y>> {
-  return {
-    _tag: 'effect',
-    [Symbol.iterator]: genFn,
-    [Symbol.asyncIterator]: async function* () {
-      const iterator = genFn()
-      let result = iterator.next()
-      while (!result.done) {
-        yield result.value as FilterLeft<Y> | FilterRequirement<Y>
-        result = iterator.next()
-      }
-      return result.value
-    },
-  }
-}
-
-export function asyncgen<Success, Failure, Requirements extends Requirement>(
-  genFn: () => AsyncGenerator<
-    Left<Failure> | Requirements,
-    Awaited<Success>,
-    never
-  >,
-): Effect<Success, Failure, Requirements> {
-  return {
-    _tag: 'effect',
-    [Symbol.asyncIterator]: genFn,
+  LeftType<FilterLeft<YieldedValues>>,
+  FilterRequirement<YieldedValues>
+>
+export function gen<Success, YieldedValues extends Left | Requirement = never>(
+  asyncgenFn: () => AsyncGenerator<YieldedValues, Success>,
+): Effect<
+  Success,
+  LeftType<FilterLeft<YieldedValues>>,
+  FilterRequirement<YieldedValues>
+>
+export function gen<Success, YieldedValues extends Left | Requirement = never>(
+  genFn: () =>
+    | Generator<YieldedValues, Success>
+    | AsyncGenerator<YieldedValues, Success>,
+):
+  | Effect<
+      Success,
+      LeftType<FilterLeft<YieldedValues>>,
+      FilterRequirement<YieldedValues>
+    >
+  | SyncEffect<
+      Success,
+      LeftType<FilterLeft<YieldedValues>>,
+      FilterRequirement<YieldedValues>
+    > {
+  const iterator = genFn()
+  if (isIterable(iterator)) {
+    return {
+      _tag: 'effect',
+      [Symbol.iterator]: genFn as () => Generator<
+        FilterLeft<YieldedValues> | FilterRequirement<YieldedValues>,
+        Success
+      >,
+      [Symbol.asyncIterator]: async function* () {
+        let result = iterator.next()
+        while (!result.done) {
+          yield result.value as
+            | FilterLeft<YieldedValues>
+            | FilterRequirement<YieldedValues>
+          result = iterator.next()
+        }
+        return result.value
+      },
+    }
+  } else {
+    return {
+      _tag: 'effect',
+      [Symbol.asyncIterator]: genFn as () => AsyncGenerator<
+        FilterLeft<YieldedValues> | FilterRequirement<YieldedValues>,
+        Success
+      >,
+    }
   }
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect, expectTypeOf } = import.meta.vitest
+  const { describe, it, expect, expectTypeOf, vi } = import.meta.vitest
 
   // eslint-disable-next-line require-yield
   const effect1 = gen(function* () {
@@ -53,9 +78,9 @@ if (import.meta.vitest) {
   const effect2 = gen(function* () {
     return 'effect2' as const
   })
-  const failure = gen<never, Left<'fail'>, never>(function* () {
-    return yield left('fail' as const)
-  })
+  const failure = gen(function* (): Generator<Left<'fail'>> {
+    yield left('fail' as const)
+  }) as SyncEffect<never, 'fail', never>
 
   describe('Synchronous Effect', () => {
     it('should combine effect', () => {
@@ -74,13 +99,17 @@ if (import.meta.vitest) {
       })
     })
     it('should combine effect that fail', () => {
+      const spy = vi.fn()
       const combined = gen(function* () {
         const a = yield* failure
+        spy()
         const b = yield* effect2
         return `Combined: ${a}, ${b}` as const
       })
       expectTypeOf(combined).toEqualTypeOf<SyncEffect<never, 'fail', never>>()
+      expect(spy).not.toHaveBeenCalled()
       const result = run(combined)
+      expect(spy).not.toHaveBeenCalled()
       expect(result).toEqual({
         _tag: 'Left',
         left: 'fail',
@@ -110,7 +139,7 @@ if (import.meta.vitest) {
   describe('Asynchronous Effect', () => {
     it('combine with sync effect', async () => {
       const asyncEffect = promise(() => Promise.resolve('async part' as const))
-      const effect = asyncgen(async function* () {
+      const effect = gen(async function* () {
         const syncResult = yield* effect1
         const asyncResult = yield* asyncEffect
         return `Combined: ${syncResult}, ${asyncResult}` as const

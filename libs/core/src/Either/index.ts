@@ -24,7 +24,7 @@ export * from './tryCatch'
  * // l.left === 'fail'
  * ```
  */
-export interface Left<L> {
+export interface Left<L = any> {
   readonly _tag: 'Left'
   readonly left: L
 }
