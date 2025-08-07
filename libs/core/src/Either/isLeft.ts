@@ -21,13 +21,28 @@ import { Either, Left } from '.'
  * console.log(isLeft(r)) // false
  * ```
  */
-export const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
-  return either._tag === 'Left'
+export function isLeft<L>(either: unknown): either is Left<L>
+export function isLeft<L, R>(either: Either<L, R>): either is Left<L>
+export function isLeft<L, R>(
+  either: Either<L, R> | unknown,
+): either is Left<L> {
+  return (
+    typeof either === 'object' &&
+    either !== null &&
+    '_tag' in either &&
+    either._tag === 'Left'
+  )
 }
 
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
-
+  it('should return false for non-Either values', () => {
+    expect(isLeft(42)).toBe(false)
+    expect(isLeft('string')).toBe(false)
+    expect(isLeft({})).toBe(false)
+    expect(isLeft(null)).toBe(false)
+    expect(isLeft(undefined)).toBe(false)
+  })
   it('should return true for Left', () => {
     const left: Either<string, number> = { _tag: 'Left', left: 'error' }
     expect(isLeft(left)).toBe(true)

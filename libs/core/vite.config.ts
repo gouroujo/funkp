@@ -14,7 +14,13 @@ export default defineConfig({
       transformMixedEsModules: true,
     },
     lib: {
-      entry: 'src/main.ts',
+      entry: {
+        main: 'src/main.ts',
+        functions: 'src/functions/index.ts',
+        Option: 'src/Option/index.ts',
+        Either: 'src/Either/index.ts',
+        Effect: 'src/Effect/index.ts',
+      },
       fileName: (format, entryName) => `${entryName}.${format}.js`,
       formats: ['es', 'cjs'],
     },

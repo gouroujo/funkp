@@ -2,8 +2,8 @@
   "name": "@funkp/core",
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/main.cjs",
-  "module": "./dist/main.mjs",
+  "main": "./dist/main.cjs.js",
+  "module": "./dist/main.es.js",
   "types": "./dist/main.d.ts",
   "exports": {
     "./package.json": "./package.json",
@@ -12,6 +12,30 @@
       "types": "./dist/main.d.ts",
       "import": "./dist/main.es.js",
       "default": "./dist/main.cjs.js"
+    },
+    "./functions": {
+      "development": "./src/functions/index.ts",
+      "types": "./dist/functions/index.d.ts",
+      "import": "./dist/functions.es.js",
+      "default": "./dist/functions.cjs.js"
+    },
+    "./Either": {
+      "development": "./src/Either/index.ts",
+      "types": "./dist/Either/index.d.ts",
+      "import": "./dist/Either.es.js",
+      "default": "./dist/Either.cjs.js"
+    },
+    "./Option": {
+      "development": "./src/Option/index.ts",
+      "types": "./dist/Option/index.d.ts",
+      "import": "./dist/Option.es.js",
+      "default": "./dist/Option.cjs.js"
+    },
+    "./Effect": {
+      "development": "./src/Effect/index.ts",
+      "types": "./dist/Effect/index.d.ts",
+      "import": "./dist/Effect.es.js",
+      "default": "./dist/Effect.cjs.js"
     }
   },
   "files": [
