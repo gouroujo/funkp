@@ -2,6 +2,8 @@ type Channel<T> = {
   buffer: T[]
   takers?: Array<(value: T) => void>
   putters?: Array<[value: T, cb?: (value: T) => void]>
+  listeners?: Array<(result: T) => void>
+  value?: T
 }
 
 type TakeInstruction<T = unknown> = {
@@ -46,30 +48,44 @@ const putHandler = <T>(channel: Channel<T>, value: T, cb: () => void) => {
   if (channel.takers && channel.takers.length > 0) {
     const taker = channel.takers.shift() as (value: T) => void
     taker(value)
+    channel.value = value
     cb()
   } else {
     channel.putters = [...(channel.putters ?? []), [value, cb]]
   }
 }
 
-const go_ = <T>(generator: Generator<Instruction<T>, void, T>, state?: T) => {
+const wait = <T>(channel: Channel<T>) => {
+  return new Promise<T>((resolve) => {
+    channel.listeners = [...(channel.listeners ?? []), resolve]
+  })
+}
+
+const go_ = <T>(
+  generator: Generator<Instruction<T>, Channel<T>, T>,
+  state?: T,
+) => {
   const step = state ? generator.next(state) : generator.next()
   if (!step.done) {
     const instruction = step.value
     if (isTakeInstruction(instruction)) {
       const { channel } = instruction
-      takeHandler(channel, (value) =>
-        setTimeout(() => go_(generator, value), 0),
-      )
+      takeHandler(channel, (value) => setImmediate(() => go_(generator, value)))
     } else if (isPutInstruction(instruction)) {
       const { channel, value } = instruction
-      putHandler(channel, value, () => setTimeout(() => go_(generator), 0))
+      putHandler(channel, value, () => setImmediate(() => go_(generator)))
+    }
+  } else {
+    console.log('done')
+    const channel = step.value
+    if (channel.value !== undefined) {
+      channel.listeners?.forEach((listener) => listener(channel.value!))
     }
   }
 }
 
 const go = <T, A extends unknown[] = never[]>(
-  genFn: (...args: A) => Generator<Instruction<T>, void, T>,
+  genFn: (...args: A) => Generator<Instruction<T>, Channel<T>, T>,
   args: A,
 ) => {
   go_(genFn(...args))
@@ -85,37 +101,38 @@ if (import.meta.vitest) {
   const player = function* (
     table: Channel<Ball>,
     name: string,
-  ): Generator<Instruction<Ball>, void, Ball> {
+  ): Generator<Instruction<Ball>, Channel<Ball>, Ball> {
     while (true) {
       const ball = yield take(table)
       if (ball === null) {
         console.log(name + ": table's gone")
-        return
+        return table
       }
       ball.hits += 1
       console.log(`${name} ${ball.hits}`)
       if (ball.hits >= 10) {
         console.log(name + ' wins!')
-        return
+        return table
       }
       console.log(name + ' played')
-      console.log(table.putters, table.takers)
       yield put(table, ball)
+      console.log(name, table.putters, table.takers)
     }
   }
 
   describe('gene', () => {
     it('should work', async () => {
       const table: Channel<Ball> = { buffer: [] }
-      const ball: Ball = { hits: 0 }
-      go(function* (): Generator<Instruction<Ball>, void, Ball> {
+      go(function* (): Generator<Instruction<Ball>, Channel<Ball>, Ball> {
         go(player, [table, 'ping'])
         go(player, [table, 'pong'])
-        yield put(table, ball)
+        yield put(table, { hits: 0 })
+        console.log('game started')
+        return table
       }, [])
-      console.log(ball)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      expect(ball.hits).toBeGreaterThanOrEqual(10)
+      const result = await wait(table)
+      // await new Promise((resolve) => setTimeout(resolve, 1000))
+      expect(result.hits).toBeGreaterThanOrEqual(10)
     })
   })
 }

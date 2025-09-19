@@ -28,14 +28,23 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vite/apps/my-app',
 
   plugins: [
-    nxViteTsPaths(),
     dts({
       entryRoot: 'src',
       tsconfigPath: path.join(__dirname, 'tsconfig.build.json'),
     }),
+    nxViteTsPaths(),
   ],
   test: {
+    globals: true,
+    cache: {
+      dir: '../node_modules/.vitest/<project-root>',
+    },
     includeSource: ['src/**/*.ts'],
+    reporters: ['default'],
+    coverage: {
+      reportsDirectory: '../coverage/<project-root>',
+      provider: 'v8',
+    },
   },
   define: {
     'import.meta.vitest': 'undefined',

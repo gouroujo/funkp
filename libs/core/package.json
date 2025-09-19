@@ -36,13 +36,27 @@
       "types": "./dist/Effect/index.d.ts",
       "import": "./dist/Effect.es.js",
       "default": "./dist/Effect.cjs.js"
+    },
+    "./Brand": {
+      "development": "./src/Brand/index.ts",
+      "types": "./dist/Brand/index.d.ts",
+      "import": "./dist/Brand.es.js",
+      "default": "./dist/Brand.cjs.js"
+    },
+    "./Fiber": {
+      "development": "./src/Fiber/index.ts",
+      "types": "./dist/Fiber/index.d.ts",
+      "import": "./dist/Fiber.es.js",
+      "default": "./dist/Fiber.cjs.js"
     }
   },
   "files": [
     "dist",
     "!**/*.tsbuildinfo"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "vitest": "^3"
+  },
   "nx": {
     "targets": {
       "build": {
