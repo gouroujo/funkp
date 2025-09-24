@@ -1,0 +1,67 @@
+{
+  "name": "@funkp/vitest",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/main.cjs.js",
+  "module": "./dist/main.es.js",
+  "types": "./dist/main.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "development": "./src/main.ts",
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.es.js",
+      "default": "./dist/main.cjs.js"
+    },
+    "./extend": {
+      "development": "./src/extend.ts",
+      "types": "./dist/extend.d.ts",
+      "import": "./dist/extend.es.js",
+      "default": "./dist/extend.cjs.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/*.tsbuildinfo"
+  ],
+  "peerDependencies": {
+    "vitest": "^3"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/vite:build",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "options": {
+          "platform": "node",
+          "outputPath": "libs/vitest/dist",
+          "main": "libs/vitest/src/main.ts",
+          "tsConfig": "libs/vitest/tsconfig.build.json",
+          "format": [
+            "esm",
+            "cjs"
+          ],
+          "esbuildOptions": {
+            "sourcemap": true,
+            "outExtension": {
+              ".js": ".mjs",
+              ".cjs": ".cjs"
+            }
+          },
+          "declarationRootDir": "libs/vitest/src"
+        }
+      },
+      "test": {
+        "executor": "@nx/vite:test",
+        "outputs": [
+          "{workspaceRoot}/coverage/libs/vitest"
+        ],
+        "options": {
+          "config": "libs/vitest/vite.config.ts"
+        }
+      }
+    }
+  }
+}

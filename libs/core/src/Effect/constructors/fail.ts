@@ -1,35 +1,37 @@
-import { Effect, runPromise } from '..'
-import { absurd } from '../../functions'
+import type { Effect } from '..'
+import { Channel, put } from '../../Channel'
+import * as E from '../../Either'
 
-export function fail<Failure>(error: Failure): Effect<never, Failure, never> {
-  return {
-    _tag: 'Fail',
-    error,
-    *[Symbol.iterator]() {
-      yield this
-      absurd()
-    },
+export const fail = <Failure>(
+  failure: Failure,
+): Effect<never, Failure, never> => {
+  return function* (channel: Channel<E.Either<Failure, never>>) {
+    yield put(channel, E.left(failure))
   }
 }
 
 if (import.meta.vitest) {
   const { describe, it, expect, expectTypeOf } = import.meta.vitest
 
-  describe('Effect.fail', () => {
-    it('should fail with the provided number', () => {
+  describe('Effect.fail', async () => {
+    const runPromise = (await import('../run')).runPromise
+    it('should fail with the provided number', async () => {
       const effect = fail(123)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, number, never>>()
-      expect(runPromise(effect)).toEqual({ _tag: 'Left', left: 123 })
+      const result = await runPromise(effect)
+      expect(result).toBeLeftWith(123)
     })
-    it('should fail with the provided string', () => {
+    it('should fail with the provided string', async () => {
       const effect = fail('foo' as const)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, 'foo', never>>()
-      expect(runPromise(effect)).toEqual({ _tag: 'Left', left: 'foo' })
+      const result = await runPromise(effect)
+      expect(result).toBeLeftWith('foo')
     })
-    it('should fail with the provided number', () => {
+    it('should fail with the provided number', async () => {
       const effect = fail(true)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, boolean, never>>()
-      expect(runPromise(effect)).toEqual({ _tag: 'Left', left: true })
+      const result = await runPromise(effect)
+      expect(result).toBeLeftWith(true)
     })
   })
 }

@@ -1,6 +1,8 @@
 import { nominal } from '../Brand'
-import { Effect } from '../Effect'
-import { Fiber, FiberId } from './fiber'
+import { chan } from '../Channel'
+import type { Effect } from '../Effect'
+import type * as E from '../Either'
+import type { Fiber, FiberId } from './fiber'
 
 const generateFiberId = () => {
   const construct = nominal<FiberId>()
@@ -12,13 +14,12 @@ export function createFiber<Success, Failure>(
   parentId?: FiberId,
 ): Fiber<Success, Failure> {
   const id = generateFiberId()
+  const channel = chan<E.Either<Failure, any>>()
   return {
     id,
     ...(parentId ? { parentId } : {}),
     childs: [],
-    status: 'Suspended',
-    callStack: [() => effect],
-    listeners: [],
-    // effect,
+    effect,
+    channel,
   }
 }

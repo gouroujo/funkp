@@ -31,9 +31,9 @@ import { right } from './right'
  * // mappedL is { _tag: 'Left', left: 'fail' }
  * ```
  */
-export function mapRight<L = never, R = never, R2 = never>(
+export function mapRight<R, R2>(
   mapFn: (r: R) => R2,
-): (either: Either<L, R>) => Either<L, R2> {
+): <L>(either: Either<L, R>) => Either<L, R2> {
   return (either) => {
     if (isRight(either)) {
       return right(mapFn(either.right))

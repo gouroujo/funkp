@@ -16,16 +16,14 @@ export default defineConfig({
     lib: {
       entry: {
         main: 'src/main.ts',
-        functions: 'src/functions/index.ts',
-        Option: 'src/Option/index.ts',
-        Either: 'src/Either/index.ts',
-        Effect: 'src/Effect/index.ts',
+        extend: 'src/extend.ts',
+        Either: 'src/either.ts',
       },
       fileName: (format, entryName) => `${entryName}.${format}.js`,
       formats: ['es', 'cjs'],
     },
   },
-  cacheDir: '../../node_modules/.vite/apps/my-app',
+  cacheDir: '../../node_modules/.vite/libs/vitest',
 
   plugins: [
     dts({
@@ -41,7 +39,6 @@ export default defineConfig({
     },
     includeSource: ['src/**/*.ts'],
     reporters: ['default'],
-    setupFiles: ['./vite.setup.ts'],
     coverage: {
       reportsDirectory: '../coverage/<project-root>',
       provider: 'v8',

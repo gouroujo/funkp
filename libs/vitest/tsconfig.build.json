@@ -7,7 +7,7 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "vitest/importMeta", "@funkp/vitest"]
+    "types": ["node", "vitest/importMeta"]
   },
   "include": ["src/**/*.ts"],
   "references": []

@@ -1,0 +1,1 @@
+import '@funkp/vitest/extend'

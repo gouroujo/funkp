@@ -1,16 +1,66 @@
-import { Effect } from '..'
+import type { Effect } from '..'
+import { type Channel, put, take } from '../../Channel'
+import * as E from '../../Either'
 
-export function map<PrevSuccess, Success, Failure, Requirements>(
-  fn: (value: PrevSuccess) => Success,
-): (
-  a: Effect<PrevSuccess, Failure, Requirements>,
-) => Effect<Success, Failure, Requirements> {
-  return (effect: Effect<PrevSuccess, Failure, Requirements>) => ({
-    _tag: 'Map',
-    effect,
-    fn,
-    *[Symbol.iterator]() {
-      return yield this
-    },
+export const map = <Success, MappedSucces, Failure, Requirements>(
+  fn: (value: Success) => MappedSucces,
+): ((
+  a: Effect<Success, Failure, Requirements>,
+) => Effect<MappedSucces, Failure, Requirements>) => {
+  return (e): Effect<any, Failure, Requirements> =>
+    function* (channel: Channel<E.Either<Failure, any>>) {
+      yield* e(channel)
+      const value = yield take(channel)
+      if (value) yield put(channel, E.mapRight(fn)(value))
+    }
+}
+export const mapError = <Success, MappedFailure, Failure, Requirements>(
+  fn: (value: Failure) => MappedFailure,
+): ((
+  a: Effect<Success, Failure, Requirements>,
+) => Effect<Success, MappedFailure, Requirements>) => {
+  return (e): Effect<Success, any, Requirements> =>
+    function* (channel: Channel<E.Either<any, Success>>) {
+      yield* e(channel)
+      const value = yield take(channel)
+      if (value) yield put(channel, E.mapLeft(fn)(value))
+    }
+}
+
+if (import.meta.vitest) {
+  const { it, expect, describe, expectTypeOf } = import.meta.vitest
+  describe('Effect.map', async () => {
+    const runPromise = (await import('../run')).runPromise
+    const succeed = (await import('../constructors/succeed')).succeed
+    const pipe = (await import('../../functions/pipe')).pipe
+
+    it('should map values', async () => {
+      const effect = pipe(
+        succeed(123),
+        map((v) => v + 1),
+        map((v) => v * 2),
+        map((v) => v - 3),
+      )
+      expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
+      const result = await runPromise(effect)
+      expect(result).toEqual({ _tag: 'Right', right: (123 + 1) * 2 - 3 })
+    })
+  })
+  describe('Effect.mapLeft', async () => {
+    const runPromise = (await import('../run')).runPromise
+    const fail = (await import('../constructors/fail')).fail
+    const pipe = (await import('../../functions/pipe')).pipe
+
+    it('should map values', async () => {
+      const effect = pipe(
+        fail(123),
+        mapError((v) => v + 1),
+        mapError((v) => v * 2),
+        mapError((v) => v - 3),
+      )
+      expectTypeOf(effect).toEqualTypeOf<Effect<never, number, never>>()
+      const result = await runPromise(effect)
+      expect(result).toEqual({ _tag: 'Left', left: (123 + 1) * 2 - 3 })
+    })
   })
 }

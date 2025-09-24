@@ -1,14 +1,12 @@
-import { Effect, runPromise } from '..'
+import type { Effect } from '..'
+import { Channel, put } from '../../Channel'
+import * as E from '../../Either'
 
-export function succeed<Success>(
+export const succeed = <Success>(
   value: Success,
-): Effect<Success, never, never> {
-  return {
-    _tag: 'Pure',
-    value,
-    *[Symbol.iterator]() {
-      return yield this
-    },
+): Effect<Success, never, never> => {
+  return function* (channel: Channel<E.Either<never, Success>>) {
+    yield put(channel, E.right(value))
   }
 }
 
@@ -17,24 +15,39 @@ export function of<Success>(value: Success): Effect<Success, never, never> {
 }
 
 if (import.meta.vitest) {
-  const { it, expect, expectTypeOf } = import.meta.vitest
+  const { it, expect, describe, expectTypeOf } = import.meta.vitest
+  describe('succeed', async () => {
+    const runPromise = (await import('../run')).runPromise
 
-  it('should succeed with the provided number', async () => {
-    const effect = succeed(123)
-    expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
-    const result = await runPromise(effect)
-    expect(result).toEqual(123)
-  })
-  it('should succeed with the provided string', async () => {
-    const effect = succeed('foo' as const)
-    expectTypeOf(effect).toEqualTypeOf<Effect<'foo', never, never>>()
-    const result = await runPromise(effect)
-    expect(result).toEqual('foo')
-  })
-  it('should succeed with the provided number', async () => {
-    const effect = succeed(true)
-    expectTypeOf(effect).toEqualTypeOf<Effect<boolean, never, never>>()
-    const result = await runPromise(effect)
-    expect(result).toEqual(true)
+    it('should succeed with the provided number', async () => {
+      const effect = succeed(123)
+      expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
+      const result = await runPromise(effect)
+      expect(result).toBeRightWith(123)
+    })
+    it('should succeed with the provided string', async () => {
+      const effect = succeed('foo' as const)
+      expectTypeOf(effect).toEqualTypeOf<Effect<'foo', never, never>>()
+      const result = await runPromise(effect)
+      expect(result).toBeRightWith('foo')
+    })
+    it('should succeed with the provided boolean', async () => {
+      const effect = succeed(true)
+      expectTypeOf(effect).toEqualTypeOf<Effect<boolean, never, never>>()
+      const result = await runPromise(effect)
+      expect(result).toBeRightWith(true)
+    })
+    it('should succeed with undefined', async () => {
+      const effect = succeed(undefined)
+      expectTypeOf(effect).toEqualTypeOf<Effect<undefined, never, never>>()
+      const result = await runPromise(effect)
+      expect(result).toBeRightWith(undefined)
+    })
+    it('should succeed with null', async () => {
+      const effect = succeed(null)
+      expectTypeOf(effect).toEqualTypeOf<Effect<null, never, never>>()
+      const result = await runPromise(effect)
+      expect(result).toBeRightWith(null)
+    })
   })
 }
