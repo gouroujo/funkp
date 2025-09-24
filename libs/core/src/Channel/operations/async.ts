@@ -18,16 +18,26 @@ export const asyncHandler = <T>(
   promise: Promise<T>,
   cb: () => void,
 ) => {
-  promise.then((value) => {
-    if (channel.closed) return cb()
-    if (channel.takers && channel.takers.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const taker = channel.takers.shift()!
-      cb()
-      setImmediate(() => taker(value))
-    } else {
-      channel.buffer.push(value)
-      cb()
-    }
-  })
+  promise
+    .then((value) => {
+      if (channel.closed) return cb()
+      if (channel.takers && channel.takers.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const taker = channel.takers.shift()!
+        cb()
+        setImmediate(() => taker(value))
+      } else {
+        channel.buffer.push(value)
+        cb()
+      }
+    })
+    .catch((error) => {
+      setImmediate(() => {
+        channel.closed = true
+        channel.takers?.forEach((cb) => cb(null))
+        channel.listeners?.forEach(([_, reject]) => {
+          reject(error)
+        })
+      })
+    })
 }

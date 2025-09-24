@@ -11,7 +11,7 @@ const player = function* (
 ): Generator<Instruction<Ball>, void, Ball | null> {
   while (true) {
     const ball = yield take(table)
-    if (ball === null) {
+    if (!ball) {
       console.log(name + ": table's gone")
       break
     }
@@ -30,11 +30,7 @@ describe('gene', () => {
       go(player, [table, 'pong'])
       console.log('game started')
       yield sleep(table, 10)
-      const ball = yield take(table)
-      if (ball) {
-        console.log('game finished')
-        close(table, ball)
-      }
+      close(table)
     }, [])
 
     const result = await wait(table)

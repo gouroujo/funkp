@@ -8,7 +8,7 @@ export function close<T>(channel: Channel<T>): void {
       channel.closed = true
       // notify all takers that the channel is closed
       channel.takers?.forEach((cb) => cb(null))
-      channel.listeners?.forEach((cb) => cb(lastValue))
+      channel.listeners?.forEach(([resolve]) => resolve(lastValue))
     },
     [channel],
   )

@@ -16,7 +16,7 @@ export * from './wait'
 export type Channel<T> = {
   takers?: Array<(value: T | null) => void>
   buffer: Array<T>
-  listeners?: Array<(result: T) => void>
+  listeners?: Array<[resolve: (result: T) => void, reject: (result: T) => void]>
   closed: boolean
 }
 
