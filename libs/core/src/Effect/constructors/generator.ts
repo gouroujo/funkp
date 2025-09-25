@@ -1,14 +1,18 @@
-import { Left, left } from 'src/Either'
-import { Effect, promise, runPromise } from '..'
+import { Effect, runPromise } from '..'
+import { Instruction } from '../../Channel'
+import * as E from '../../Either'
+import { promise } from './async'
 
-export function gen<Success, Failure, Requirements>(
-  genFn: () => Generator<Effect<any, Failure, Requirements>, Success, any>,
+export function gen<Success, Failure = never, Requirements = never>(
+  genFn: () => Generator<
+    Instruction<E.Either<Failure, Success>>,
+    E.Either<Failure, Success>,
+    any
+  >,
 ): Effect<Success, Failure, Requirements> {
   return {
-    _tag: 'Gen',
-    gen: genFn,
     *[Symbol.iterator]() {
-      return yield this
+      return yield* genFn()
     },
   }
 }
@@ -17,28 +21,29 @@ if (import.meta.vitest) {
   const { describe, it, expect, expectTypeOf, vi } = import.meta.vitest
 
   // eslint-disable-next-line require-yield
-  const effect1 = gen(function* () {
-    return 'effect1' as const
+  const effect1 = gen<'effect1'>(function* () {
+    return E.right('effect1' as const)
   })
   // eslint-disable-next-line require-yield
-  const effect2 = gen(function* () {
-    return 'effect2' as const
+  const effect2 = gen<'effect2'>(function* () {
+    return E.right('effect2' as const)
   })
-  const failure = gen(function* (): Generator<Left<'fail'>> {
-    yield left('fail' as const)
+  // eslint-disable-next-line require-yield
+  const failure = gen<never, 'fail'>(function* () {
+    return E.left('fail' as const)
   })
 
   describe('Synchronous Effect', () => {
-    it('should combine effect', () => {
+    it('should combine effect', async () => {
       const combined = gen(function* () {
         const a = yield* effect1
         const b = yield* effect2
-        return `Combined: ${a}, ${b}` as const
+        return b
       })
       expectTypeOf(combined).toEqualTypeOf<
         Effect<'Combined: effect1, effect2', never, never>
       >()
-      const result = runPromise(combined)
+      const result = await runPromise(combined)
       expect(result).toEqual({
         _tag: 'Right',
         right: 'Combined: effect1, effect2',
@@ -63,7 +68,7 @@ if (import.meta.vitest) {
     })
     it('should combine effect that could fail', () => {
       const potentialFailure = gen(function* () {
-        yield left('failure' as const)
+        yield E.left('failure' as const)
         return 'effect1' as const
       })
       const combined = gen(function* () {

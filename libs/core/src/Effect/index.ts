@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { Channel, Instruction } from '../Channel'
+import type { Instruction } from '../Channel'
 import type * as E from '../Either'
 
 export * from './constructors'
@@ -15,10 +15,6 @@ export type Failure<T extends Effect<unknown, unknown, unknown>> =
 export type Context<T extends Effect<unknown, unknown, unknown>> =
   T extends Effect<unknown, unknown, infer C> ? C : never
 
-export type Effect<Success, Failure = never, Requirements = never> = (
-  channel: Channel<E.Either<Failure, Success>>,
-) => Generator<
-  Instruction<E.Either<Failure, Success>>,
-  void,
-  E.Either<Failure, any> | null
->
+export type Effect<Success, Failure = never, Requirements = never> = {
+  [Symbol.iterator](): Iterator<Instruction, E.Either<Failure, Success>, any>
+}

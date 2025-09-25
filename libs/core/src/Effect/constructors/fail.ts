@@ -1,12 +1,15 @@
 import type { Effect } from '..'
-import { Channel, put } from '../../Channel'
 import * as E from '../../Either'
 
 export const fail = <Failure>(
   failure: Failure,
 ): Effect<never, Failure, never> => {
-  return function* (channel: Channel<E.Either<Failure, never>>) {
-    yield put(channel, E.left(failure))
+  return {
+    [Symbol.iterator]() {
+      return {
+        next: () => ({ done: true, value: E.left(failure) }),
+      }
+    },
   }
 }
 

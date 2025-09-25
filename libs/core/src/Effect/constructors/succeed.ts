@@ -1,12 +1,15 @@
 import type { Effect } from '..'
-import { Channel, put } from '../../Channel'
 import * as E from '../../Either'
 
 export const succeed = <Success>(
   value: Success,
 ): Effect<Success, never, never> => {
-  return function* (channel: Channel<E.Either<never, Success>>) {
-    yield put(channel, E.right(value))
+  return {
+    [Symbol.iterator]() {
+      return {
+        next: () => ({ done: true, value: E.right(value) }),
+      }
+    },
   }
 }
 
@@ -16,7 +19,7 @@ export function of<Success>(value: Success): Effect<Success, never, never> {
 
 if (import.meta.vitest) {
   const { it, expect, describe, expectTypeOf } = import.meta.vitest
-  describe('succeed', async () => {
+  describe('Effect.succeed', async () => {
     const runPromise = (await import('../run')).runPromise
 
     it('should succeed with the provided number', async () => {

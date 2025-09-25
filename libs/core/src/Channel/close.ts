@@ -1,15 +1,9 @@
-import { Channel, go } from './index'
-import { take } from './operations'
+import { Channel } from './index'
 
-export function close<T>(channel: Channel<T>): void {
-  go(
-    function* (channel: Channel<T>) {
-      const lastValue = (yield take(channel)) as T
-      channel.closed = true
-      // notify all takers that the channel is closed
-      channel.takers?.forEach((cb) => cb(null))
-      channel.listeners?.forEach(([resolve]) => resolve(lastValue))
-    },
-    [channel],
-  )
+export function close<T>(channel: Channel<T>, lastValue: T): void {
+  setImmediate(() => {
+    channel.closed = true
+    channel.takers.forEach((cb) => cb(null))
+    channel.listeners.forEach(([resolve]) => resolve(lastValue))
+  })
 }

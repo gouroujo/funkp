@@ -13,18 +13,19 @@ export * from './isEmpty'
 export { async, put, sleep, take } from './operations'
 export * from './wait'
 
-export type Channel<T> = {
-  takers?: Array<(value: T | null) => void>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Channel<T = any> = {
+  takers: Array<(value: T | null) => void>
   buffer: Array<T>
-  listeners?: Array<[resolve: (result: T) => void, reject: (result: T) => void]>
+  listeners: Array<[resolve: (result: T) => void, reject: (result: T) => void]>
   closed: boolean
 }
 
 export type ChannelFn<C extends Channel<any>> =
-  C extends Channel<infer T> ? Generator<Instruction<T>, void, T | null> : never
+  C extends Channel<infer T> ? Generator<Instruction<T>, T, T | null> : never
 
-export type Instruction<T> =
-  | TakeInstruction<T>
+export type Instruction<T = any> =
+  | TakeInstruction
   | PutInstruction<T>
   | SleepInstruction<T>
   | AsyncInstruction<T>

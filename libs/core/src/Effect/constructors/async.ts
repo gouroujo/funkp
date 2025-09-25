@@ -2,24 +2,20 @@ import type { Effect } from '..'
 import { async, Channel, ChannelFn } from '../../Channel'
 import * as E from '../../Either'
 
-const promise = <Success>(
+export const promise = <Success>(
   promiseFn: () => Promise<Success>,
 ): Effect<Success, never, never> => {
-  return function* (
-    channel: Channel<E.Either<never, Success>>,
-  ): ChannelFn<typeof channel> {
-    yield async(channel, promiseFn().then(E.right))
+  return function* (channel: Channel): ChannelFn<typeof channel> {
+    return yield async(channel, promiseFn().then(E.right))
   }
 }
 
-export const tryPromise = <Success, Failure, Requirements>(
+export const tryPromise = <Success, Failure>(
   promiseFn: () => Promise<Success>,
   catchFn: (error: unknown) => Failure,
-): Effect<Success, Failure, Requirements> => {
-  return function* (
-    channel: Channel<E.Either<Failure, Success>>,
-  ): ChannelFn<typeof channel> {
-    yield async(
+): Effect<Success, Failure, never> => {
+  return function* (channel: Channel): ChannelFn<typeof channel> {
+    return yield async(
       channel,
       promiseFn()
         .then(E.right)

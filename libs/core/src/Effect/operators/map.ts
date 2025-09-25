@@ -1,5 +1,4 @@
 import type { Effect } from '..'
-import { type Channel, put, take } from '../../Channel'
 import * as E from '../../Either'
 
 export const map = <Success, MappedSucces, Failure, Requirements>(
@@ -7,24 +6,26 @@ export const map = <Success, MappedSucces, Failure, Requirements>(
 ): ((
   a: Effect<Success, Failure, Requirements>,
 ) => Effect<MappedSucces, Failure, Requirements>) => {
-  return (e): Effect<any, Failure, Requirements> =>
-    function* (channel: Channel<E.Either<Failure, any>>) {
-      yield* e(channel)
-      const value = yield take(channel)
-      if (value) yield put(channel, E.mapRight(fn)(value))
-    }
+  return (e) => ({
+    *[Symbol.iterator]() {
+      const value = yield* e
+      const mapped = E.map(fn)(value)
+      return mapped
+    },
+  })
 }
 export const mapError = <Success, MappedFailure, Failure, Requirements>(
   fn: (value: Failure) => MappedFailure,
 ): ((
   a: Effect<Success, Failure, Requirements>,
 ) => Effect<Success, MappedFailure, Requirements>) => {
-  return (e): Effect<Success, any, Requirements> =>
-    function* (channel: Channel<E.Either<any, Success>>) {
-      yield* e(channel)
-      const value = yield take(channel)
-      if (value) yield put(channel, E.mapLeft(fn)(value))
-    }
+  return (e) => ({
+    *[Symbol.iterator]() {
+      const value = yield* e
+      const mapped = E.mapLeft(fn)(value)
+      return mapped
+    },
+  })
 }
 
 if (import.meta.vitest) {
