@@ -5,6 +5,6 @@ export const runFiber =
   <Success, Failure>() =>
   (fiber: Fiber<Success, Failure>) => {
     const generator = fiber.effect[Symbol.iterator]()
-    go(generator, fiber.channel)
+    go(generator, fiber.channel, fiber.effect.context)
     return fiber
   }

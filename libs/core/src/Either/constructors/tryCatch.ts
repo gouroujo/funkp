@@ -1,4 +1,5 @@
-import { Either, left, right } from '.'
+import { left, right } from '.'
+import type { Either } from '..'
 
 /**
  * Creates an `Either` by executing a function that may throw.
@@ -32,27 +33,28 @@ export function tryCatch<E = unknown, A = unknown>(
 }
 
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
-
-  it('returns Right when function succeeds', () => {
-    const result = tryCatch(() => 42)
-    expect(result).toEqual({ _tag: 'Right', right: 42 })
-  })
-
-  it('returns Left when function throws', () => {
-    const result = tryCatch(() => {
-      throw new Error('fail')
+  const { it, expect, describe } = import.meta.vitest
+  describe('Either.tryCatch', async () => {
+    it('returns Right when function succeeds', () => {
+      const result = tryCatch(() => 42)
+      expect(result).toEqual({ _tag: 'Right', right: 42 })
     })
-    expect(result).toEqual({ _tag: 'Left', left: expect.any(Error) })
-  })
 
-  it('maps error with onError', () => {
-    const result = tryCatch(
-      () => {
+    it('returns Left when function throws', () => {
+      const result = tryCatch(() => {
         throw new Error('fail')
-      },
-      (e) => (e instanceof Error ? e.message : String(e)),
-    )
-    expect(result).toEqual({ _tag: 'Left', left: 'fail' })
+      })
+      expect(result).toEqual({ _tag: 'Left', left: expect.any(Error) })
+    })
+
+    it('maps error with onError', () => {
+      const result = tryCatch(
+        () => {
+          throw new Error('fail')
+        },
+        (e) => (e instanceof Error ? e.message : String(e)),
+      )
+      expect(result).toEqual({ _tag: 'Left', left: 'fail' })
+    })
   })
 }

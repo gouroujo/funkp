@@ -21,11 +21,8 @@ export type Channel<T = any> = {
   closed: boolean
 }
 
-export type ChannelFn<C extends Channel<any>> =
-  C extends Channel<infer T> ? Generator<Instruction<T>, T, T | null> : never
-
 export type Instruction<T = any> =
   | TakeInstruction
   | PutInstruction<T>
-  | SleepInstruction<T>
+  | SleepInstruction
   | AsyncInstruction<T>

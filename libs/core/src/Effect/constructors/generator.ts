@@ -1,18 +1,20 @@
-import { Effect, runPromise } from '..'
+import { Effect, map, runPromise } from '..'
 import { Instruction } from '../../Channel'
+import { FilterRequirement, Requirement } from '../../Context'
 import * as E from '../../Either'
+import { pipe } from '../../functions'
 import { promise } from './async'
 
-export function gen<Success, Failure = never, Requirements = never>(
-  genFn: () => Generator<
-    Instruction<E.Either<Failure, Success>>,
-    E.Either<Failure, Success>,
-    any
-  >,
-): Effect<Success, Failure, Requirements> {
+export function gen<
+  Success,
+  Failure = never,
+  YieldingValues extends Instruction | Requirement = never,
+>(
+  genFn: () => Generator<YieldingValues, E.Either<Failure, Success>, any>,
+): Effect<Success, Failure, FilterRequirement<YieldingValues>> {
   return {
     *[Symbol.iterator]() {
-      return yield* genFn()
+      return yield* genFn() as any
     },
   }
 }
@@ -33,73 +35,52 @@ if (import.meta.vitest) {
     return E.left('fail' as const)
   })
 
-  describe('Synchronous Effect', () => {
+  describe('Effect.gen', () => {
     it('should combine effect', async () => {
-      const combined = gen(function* () {
-        const a = yield* effect1
-        const b = yield* effect2
-        return b
-      })
+      const combined = pipe(
+        gen(function* () {
+          const a = yield* effect1
+          const b = yield* effect2
+          return E.all([a, b])
+        }),
+        map(([a, b]) => `Combined: ${a}, ${b}` as const),
+        map((a) => a),
+      )
       expectTypeOf(combined).toEqualTypeOf<
         Effect<'Combined: effect1, effect2', never, never>
       >()
       const result = await runPromise(combined)
-      expect(result).toEqual({
-        _tag: 'Right',
-        right: 'Combined: effect1, effect2',
-      })
+      expect(result).toEqualRight('Combined: effect1, effect2')
     })
-    it('should combine effect that fail', () => {
-      const spy = vi.fn()
-      const combined = gen(function* () {
-        const a = yield* failure
-        spy()
-        const b = yield* effect2
-        return `Combined: ${a}, ${b}` as const
-      })
-      expectTypeOf(combined).toEqualTypeOf<Effect<never, 'fail', never>>()
-      expect(spy).not.toHaveBeenCalled()
-      const result = runPromise(combined)
-      expect(spy).not.toHaveBeenCalled()
-      expect(result).toEqual({
-        _tag: 'Left',
-        left: 'fail',
-      })
-    })
-    it('should combine effect that could fail', () => {
-      const potentialFailure = gen(function* () {
-        yield E.left('failure' as const)
-        return 'effect1' as const
-      })
-      const combined = gen(function* () {
-        const a = yield* potentialFailure
-        const b = yield* effect2
-        return `Combined: ${a}, ${b}` as const
-      })
-      expectTypeOf(combined).toEqualTypeOf<
-        Effect<'Combined: effect1, effect2', 'failure', never>
-      >()
-      const result = runPromise(combined)
-      expect(result).toEqual({
-        _tag: 'Left',
-        left: 'failure',
-      })
-    })
-  })
+    it('should combine effect that fail', async () => {
+      const combined = pipe(
+        gen(function* () {
+          const a = yield* failure
+          const b = yield* effect2
+          return E.all([a, b])
+        }),
+        map(([a, b]) => `Combined: ${a}, ${b}` as const),
+        map((a) => a),
+      )
 
-  describe('Asynchronous Effect', () => {
-    it('combine with sync effect', async () => {
+      expectTypeOf(combined).toEqualTypeOf<Effect<never, 'fail', never>>()
+      const result = await runPromise(combined)
+      expect(result).toEqualLeft('fail')
+    })
+
+    it('should combine with async effect', async () => {
       const asyncEffect = promise(() => Promise.resolve('async part' as const))
-      const effect = gen(async function* () {
-        const syncResult = yield* effect1
-        const asyncResult = yield* asyncEffect
-        return `Combined: ${syncResult}, ${asyncResult}` as const
-      })
+      const effect = pipe(
+        gen(function* () {
+          const syncResult = yield* effect1
+          const asyncResult = yield* asyncEffect
+          return E.all([syncResult, asyncResult])
+        }),
+        map(([a, b]) => `Combined: ${a}, ${b}` as const),
+        map((a) => a),
+      )
       const result = await runPromise(effect)
-      expect(result).toEqual({
-        _tag: 'Right',
-        right: 'Combined: effect1, async part',
-      })
+      expect(result).toEqualRight('Combined: effect1, async part')
     })
   })
 }

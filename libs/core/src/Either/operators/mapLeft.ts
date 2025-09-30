@@ -1,6 +1,6 @@
-import { Either, Left, right } from '.'
-import { isLeft } from './isLeft'
-import { left } from './left'
+import { Either, Left, right } from '..'
+import { left } from '../constructors/left'
+import { isLeft } from '../isLeft'
 
 /**
  * Maps a function over the `Left` value of an `Either`.

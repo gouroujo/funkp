@@ -22,19 +22,19 @@ if (import.meta.vitest) {
       const effect = fail(123)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, number, never>>()
       const result = await runPromise(effect)
-      expect(result).toBeLeftWith(123)
+      expect(result).toEqualLeft(123)
     })
     it('should fail with the provided string', async () => {
       const effect = fail('foo' as const)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, 'foo', never>>()
       const result = await runPromise(effect)
-      expect(result).toBeLeftWith('foo')
+      expect(result).toEqualLeft('foo')
     })
     it('should fail with the provided number', async () => {
       const effect = fail(true)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, boolean, never>>()
       const result = await runPromise(effect)
-      expect(result).toBeLeftWith(true)
+      expect(result).toEqualLeft(true)
     })
   })
 }

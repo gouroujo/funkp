@@ -1,14 +1,9 @@
-export * from './bimap'
-export * from './filterOrElse'
 export * from './isLeft'
 export * from './isRight'
-export * from './left'
-export * from './mapLeft'
-export * from './operators'
-export * from './orElse'
-export * from './right'
-export * from './tryCatch'
 
+export * from './combinators'
+export * from './constructors'
+export * from './operators'
 /**
  * Represents the Left variant of an {@link Either}.
  *

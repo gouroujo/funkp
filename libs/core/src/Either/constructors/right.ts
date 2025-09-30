@@ -1,4 +1,4 @@
-import { Either } from '.'
+import type { Right } from '..'
 
 /**
  * Constructs a `Right` value of the `Either` type.
@@ -17,7 +17,7 @@ import { Either } from '.'
  * // r is { _tag: 'Right', right: 42 }
  * ```
  */
-export const right = <R>(rightValue: R): Either<never, R> => ({
+export const right = <R>(rightValue: R): Right<R> => ({
   _tag: 'Right',
   right: rightValue,
 })

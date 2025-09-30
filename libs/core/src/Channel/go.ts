@@ -1,11 +1,15 @@
 import { absurd } from 'src/functions'
 import { Channel, close, Instruction, put } from '.'
+import * as Context from '../Context'
 
 export const go = <T>(
-  generator: Iterator<Instruction<T>, T, T | null>,
+  generator: Iterator<Instruction<T> | Context.Requirement, T, any>,
   channel: Channel<T>,
+  context: Context.Context = {},
 ) => {
-  ;(function go_(state: IteratorResult<Instruction<T>, T>) {
+  ;(function go_(
+    state: IteratorResult<Instruction<T> | Context.Requirement, T>,
+  ) {
     if (!state.done && !channel.closed) {
       const instruction = state.value
       switch (instruction._tag) {
@@ -35,6 +39,16 @@ export const go = <T>(
           instruction.promise.then((value) => {
             go_({ done: false, value: put(value) })
           })
+          break
+        }
+        case 'requirement': {
+          if (context.services?.has(instruction.id)) {
+            go_(generator.next(context.services.get(instruction.id)))
+          } else {
+            throw new Error(
+              `Requirement ${instruction.id} has not been found in the current context.`,
+            )
+          }
           break
         }
         case 'sleep': {

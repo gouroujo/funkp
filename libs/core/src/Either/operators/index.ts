@@ -1,2 +1,6 @@
+export * from './bimap'
+export * from './filterOrElse'
 export * from './flatten'
+export * from './mapLeft'
 export * from './mapRight'
+export * from './orElse'

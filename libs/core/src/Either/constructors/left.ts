@@ -1,4 +1,4 @@
-import { Left } from '.'
+import type { Left } from '..'
 
 /**
  * Constructs a `Left` value of the `Either` type.

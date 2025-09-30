@@ -1,5 +1,5 @@
-import { Predicate } from 'src/utils/function/types'
-import { Either, isRight, left, right } from '.'
+import { Either, isRight, left, right } from '..'
+import { Predicate } from '../../utils/function/types'
 
 /**
  * Returns a function that filters an `Either` value using the provided predicate.

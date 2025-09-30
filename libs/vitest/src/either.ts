@@ -10,12 +10,14 @@ const matchers: MatchersObject = {
       message: () => `${received} is${isNot ? ' not' : ''} Right`,
     }
   },
-  toBeRightWith(received, expected) {
-    const { isNot } = this
+  toEqualRight(received, expected) {
+    const { isNot, equals } = this
     return {
       // do not alter your "pass" based on isNot. Vitest does it for you
-      pass: received._tag === 'Right' && received.right === expected,
-      message: () => `${received} is${isNot ? ' not' : ''} ${expected}`,
+      pass: received._tag === 'Right' && equals(received.right, expected),
+      message: () => `${received} is${isNot ? ' not' : ''} Right`,
+      actual: received,
+      expected,
     }
   },
   toBeLeft(received) {
@@ -26,12 +28,14 @@ const matchers: MatchersObject = {
       message: () => `${received} is${isNot ? ' not' : ''} Left`,
     }
   },
-  toBeLeftWith(received, expected) {
-    const { isNot } = this
+  toEqualLeft(received, expected) {
+    const { isNot, equals } = this
     return {
       // do not alter your "pass" based on isNot. Vitest does it for you
-      pass: received._tag === 'Left' && received.left === expected,
+      pass: received._tag === 'Left' && equals(received.left, expected),
       message: () => `${received} is${isNot ? ' not' : ''} ${expected}`,
+      actual: received,
+      expected,
     }
   },
 }
@@ -39,9 +43,9 @@ export default matchers
 
 export interface EitherMatchers<R = unknown> {
   toBeRight: () => void
-  toBeRightWith: (value: unknown) => void
+  toEqualRight: (value: unknown) => void
   toBeLeft: () => void
-  toBeLeftWith: (value: unknown) => void
+  toEqualLeft: (value: unknown) => void
 }
 
 declare module 'vitest' {

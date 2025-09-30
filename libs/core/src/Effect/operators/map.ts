@@ -6,11 +6,11 @@ export const map = <Success, MappedSucces, Failure, Requirements>(
 ): ((
   a: Effect<Success, Failure, Requirements>,
 ) => Effect<MappedSucces, Failure, Requirements>) => {
-  return (e) => ({
+  return (effect) => ({
+    ...effect,
     *[Symbol.iterator]() {
-      const value = yield* e
-      const mapped = E.map(fn)(value)
-      return mapped
+      const value = yield* effect
+      return E.map(fn)(value)
     },
   })
 }
@@ -19,11 +19,11 @@ export const mapError = <Success, MappedFailure, Failure, Requirements>(
 ): ((
   a: Effect<Success, Failure, Requirements>,
 ) => Effect<Success, MappedFailure, Requirements>) => {
-  return (e) => ({
+  return (effect) => ({
+    ...effect,
     *[Symbol.iterator]() {
-      const value = yield* e
-      const mapped = E.mapLeft(fn)(value)
-      return mapped
+      const value = yield* effect
+      return E.mapLeft(fn)(value)
     },
   })
 }

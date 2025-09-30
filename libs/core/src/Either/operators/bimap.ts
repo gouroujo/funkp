@@ -1,4 +1,6 @@
-import { Either, isLeft, left, right } from '.'
+import type { Either } from '..'
+import { isLeft } from '..'
+import { left, right } from '../constructors'
 
 /**
  * Applies two functions to an `Either` value, one for the `Left` case and one for the `Right` case.
