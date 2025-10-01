@@ -1,5 +1,5 @@
 import type { Effect } from '..'
-import { async } from '../../Channel'
+import { put } from '../../Channel'
 import * as E from '../../Either'
 
 export const promise = <Success>(
@@ -7,7 +7,7 @@ export const promise = <Success>(
 ): Effect<Success, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield async(promiseFn().then(E.right))
+      return yield put(promiseFn().then(E.right))
     },
   }
 }
@@ -18,7 +18,7 @@ export const tryCatch = <Success, Failure>(
 ): Effect<Success, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield async(
+      return yield put(
         promiseFn()
           .then(E.right)
           .catch((e) => E.left(catchFn(e))),

@@ -14,7 +14,7 @@ export function createFiber<Success, Failure>(
   parentId?: FiberId,
 ): Fiber<Success, Failure> {
   const id = generateFiberId()
-  const channel = chan<E.Either<Failure, any>>()
+  const channel = chan<E.Either<Failure, any>>(1, { strategy: 'sliding' })
   return {
     id,
     ...(parentId ? { parentId } : {}),

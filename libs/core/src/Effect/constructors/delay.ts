@@ -1,16 +1,20 @@
 import { Effect } from '..'
-import { Channel, ChannelFn, put, sleep } from '../../Channel'
+import { put, sleep } from '../../Channel'
 import * as E from '../../Either'
 
 export function delay<T>(value: T, ms: number): Effect<T, never, never> {
-  return function* (channel: Channel): ChannelFn<typeof channel> {
-    yield sleep(channel, ms)
-    return yield put(channel, E.right(value))
+  return {
+    *[Symbol.iterator]() {
+      yield sleep(ms)
+      return yield put(E.right(value))
+    },
   }
 }
 export function delayFail<E>(error: E, ms: number): Effect<never, E, never> {
-  return function* (channel: Channel): ChannelFn<typeof channel> {
-    yield sleep(channel, ms)
-    return yield put(channel, E.left(error))
+  return {
+    *[Symbol.iterator]() {
+      yield sleep(ms)
+      return yield put(E.left(error))
+    },
   }
 }

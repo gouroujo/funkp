@@ -1,4 +1,4 @@
-import { Channel } from './index'
+import type { Channel } from './types'
 
 export function close<T>(channel: Channel<T>, lastValue: T): void {
   setImmediate(() => {

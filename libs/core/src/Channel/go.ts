@@ -1,6 +1,8 @@
-import { absurd } from 'src/functions'
-import { Channel, close, Instruction, put } from '.'
 import * as Context from '../Context'
+import { absurd } from '../functions'
+import { close } from './close'
+import { put } from './operations'
+import type { Channel, Instruction } from './types'
 
 export const go = <T>(
   generator: Iterator<Instruction<T> | Context.Requirement, T, any>,
@@ -14,10 +16,9 @@ export const go = <T>(
       const instruction = state.value
       switch (instruction._tag) {
         case 'take': {
-          if (channel.buffer.length > 0) {
-            setImmediate(() =>
-              go_(generator.next(channel.buffer.shift() ?? null)),
-            )
+          const value = channel.buffer.take()
+          if (value !== null) {
+            setImmediate(() => go_(generator.next(value)))
           } else {
             channel.takers.push((value) => {
               go_(generator.next(value))
@@ -26,19 +27,19 @@ export const go = <T>(
           break
         }
         case 'put': {
+          const value = instruction.value
+          if (value instanceof Promise) {
+            value.then((resolved) => go_({ done: false, value: put(resolved) }))
+            break
+          }
           const firstTaker = channel.takers.shift()
           if (firstTaker) {
-            setImmediate(() => firstTaker(instruction.value))
+            setImmediate(() => firstTaker(value))
+          } else if (channel.buffer.put(value)) {
+            go_(generator.next(value))
           } else {
-            channel.buffer.push(instruction.value)
+            setImmediate(() => go_(state))
           }
-          go_(generator.next(instruction.value))
-          break
-        }
-        case 'async': {
-          instruction.promise.then((value) => {
-            go_({ done: false, value: put(value) })
-          })
           break
         }
         case 'requirement': {

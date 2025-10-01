@@ -1,5 +1,5 @@
 import { Effect, map, runPromise } from '..'
-import { Instruction } from '../../Channel'
+import { Instruction, put } from '../../Channel'
 import { FilterRequirement, Requirement } from '../../Context'
 import * as E from '../../Either'
 import { pipe } from '../../functions'
@@ -14,7 +14,7 @@ export function gen<
 ): Effect<Success, Failure, FilterRequirement<YieldingValues>> {
   return {
     *[Symbol.iterator]() {
-      return yield* genFn() as any
+      return yield put(yield* genFn() as any)
     },
   }
 }

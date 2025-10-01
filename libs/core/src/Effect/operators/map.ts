@@ -1,29 +1,30 @@
 import type { Effect } from '..'
+import { put, take } from '../../Channel'
 import * as E from '../../Either'
 
 export const map = <Success, MappedSucces, Failure, Requirements>(
   fn: (value: Success) => MappedSucces,
 ): ((
-  a: Effect<Success, Failure, Requirements>,
+  effect: Effect<Success, Failure, Requirements>,
 ) => Effect<MappedSucces, Failure, Requirements>) => {
   return (effect) => ({
-    ...effect,
     *[Symbol.iterator]() {
-      const value = yield* effect
-      return E.map(fn)(value)
+      yield* effect
+      const value = yield take()
+      return yield put(E.map(fn)(value))
     },
   })
 }
 export const mapError = <Success, MappedFailure, Failure, Requirements>(
   fn: (value: Failure) => MappedFailure,
 ): ((
-  a: Effect<Success, Failure, Requirements>,
+  effect: Effect<Success, Failure, Requirements>,
 ) => Effect<Success, MappedFailure, Requirements>) => {
   return (effect) => ({
-    ...effect,
     *[Symbol.iterator]() {
-      const value = yield* effect
-      return E.mapLeft(fn)(value)
+      yield* effect
+      const value = yield take()
+      return yield put(E.mapLeft(fn)(value))
     },
   })
 }

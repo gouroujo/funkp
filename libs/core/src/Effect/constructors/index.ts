@@ -1,5 +1,5 @@
 export * from './async'
+export * from './delay'
 export * from './fail'
 export * from './generator'
 export * from './succeed'
-
