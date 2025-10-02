@@ -2,16 +2,15 @@
 // import { gen } from './gen'
 // import { promise } from './promise'
 
+import { chan, put, take } from '../../Channel'
+import { isLeft, isRight, right } from '../../Either'
+import { gen, promise } from '../constructors'
 import {
-  runPromise,
   type Effect,
   type Failure,
   type Requirements,
   type Success,
-} from '..'
-import { chan, put, take } from '../../Channel'
-import { isLeft, isRight, right } from '../../Either'
-import { gen, promise } from '../constructors'
+} from '../types'
 import { concurrency, type Concurrency } from './concurrency'
 
 type Options = {
@@ -59,7 +58,9 @@ if (import.meta.vitest) {
         }),
     )
 
-  describe('Effect.all', () => {
+  describe('Effect.all', async () => {
+    const { runPromise } = await import('../run')
+
     it('should sequentially order effect', async () => {
       const task1 = makeTask('a' as const, 200)
       const task2 = makeTask('b' as const, 100)

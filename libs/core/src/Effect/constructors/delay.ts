@@ -1,6 +1,6 @@
-import { Effect } from '..'
 import { put, sleep } from '../../Channel'
 import * as E from '../../Either'
+import type { Effect } from '../types'
 
 export function delay<T>(value: T, ms: number): Effect<T, never, never> {
   return {

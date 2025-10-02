@@ -1,6 +1,6 @@
-import type { Effect } from '..'
 import { put } from '../../Channel'
 import * as E from '../../Either'
+import type { Effect } from '../types'
 
 export const fail = <Failure>(
   failure: Failure,
