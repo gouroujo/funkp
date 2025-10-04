@@ -1,18 +1,18 @@
-import { type Instruction, put } from '../../Channel'
-import type { FilterRequirement, Requirement } from '../../Context'
+import type { FilterRequirement, ServiceType } from '../../Context'
 import type { Either } from '../../Either'
+import { Instruction } from '../../Fiber/instructions'
 import type { Effect } from '../types'
 
 export function gen<
   Success,
   Failure = never,
-  YieldingValues extends Instruction | Requirement = never,
+  YieldingValues extends ServiceType | Instruction = never,
 >(
   genFn: () => Generator<YieldingValues, Either<Failure, Success>, any>,
 ): Effect<Success, Failure, FilterRequirement<YieldingValues>> {
   return {
     *[Symbol.iterator]() {
-      return yield put(yield* genFn() as any)
+      return yield* genFn() as any
     },
   }
 }
@@ -22,22 +22,14 @@ if (import.meta.vitest) {
 
   describe('Effect.gen', async () => {
     const { map } = await import('../operators')
+    const { succeed, fail } = await import('.')
     const { runPromise } = await import('../run')
     const { pipe } = await import('../../functions')
     const E = await import('../../Either')
 
-    // eslint-disable-next-line require-yield
-    const effect1 = gen<'effect1'>(function* () {
-      return E.right('effect1' as const)
-    })
-    // eslint-disable-next-line require-yield
-    const effect2 = gen<'effect2'>(function* () {
-      return E.right('effect2' as const)
-    })
-    // eslint-disable-next-line require-yield
-    const failure = gen<never, 'fail'>(function* () {
-      return E.left('fail' as const)
-    })
+    const effect1 = succeed('effect1' as const)
+    const effect2 = succeed('effect2' as const)
+    const failure = fail('fail' as const)
 
     it('should combine effect', async () => {
       const combined = pipe(

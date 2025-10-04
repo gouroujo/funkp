@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Instruction } from '../Channel'
 import type { Either } from '../Either'
+import type { Instruction } from '../Fiber/instructions'
 // import type { Context } from '../Context'
 
 export type Success<T extends Effect<unknown, unknown, any>> =
@@ -11,11 +11,7 @@ export type Requirements<T extends Effect<unknown, unknown, any>> =
   T extends Effect<unknown, unknown, infer C> ? C : never
 
 export type Effect<Success, Failure = never, Requirements = never> = {
-  [Symbol.iterator](): Iterator<
-    Instruction | Requirements,
-    Either<Failure, Success>,
-    any
-  >
+  [Symbol.iterator](): Iterator<Instruction, Either<Failure, Success>, any>
   //   context?: Context
 }
 

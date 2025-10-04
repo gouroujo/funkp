@@ -1,13 +1,13 @@
-import type { Effect } from '..'
-import { put } from '../../Channel'
 import { right } from '../../Either'
+import { pure } from '../../Fiber/instructions'
+import type { Effect } from '../types'
 
 export const succeed = <Success>(
   value: Success,
 ): Effect<Success, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield put(right(value))
+      return yield* pure(right(value))
     },
   }
 }

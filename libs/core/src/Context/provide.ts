@@ -1,29 +1,29 @@
 import { Effect, gen, map, runPromise, succeed } from '../Effect'
+import { injectFiber } from '../Fiber/inject'
 import { pipe } from '../functions'
-import {
-  Requirement,
-  RequirementContainer,
-  RequirementFactory,
-} from './requirement'
+import { Service, ServiceContainer } from './requirement'
 
-export function provide<Service, R extends RequirementContainer<Service>>(
+export function provide<Impl, R extends ServiceContainer<Impl>>(
   requirement: R,
-  implementation: Service,
+  implementation: Impl,
 ) {
-  return <S, E, A extends Requirement>(
+  return <S, E, A extends InstanceType<R>>(
     effect: Effect<S, E, A>,
-  ): Effect<S, E, Exclude<A, InstanceType<R>>> => {
-    effect.context ??= {}
-    effect.context.services ??= new Map()
-    effect.context.services.set(requirement.id, implementation)
-    return effect as Effect<S, E, Exclude<A, InstanceType<R>>>
-  }
+  ): Effect<S, E, Exclude<A, InstanceType<R>>> => ({
+    *[Symbol.iterator]() {
+      const fiber = yield* injectFiber()
+      fiber.context ??= {}
+      fiber.context.services ??= new Map()
+      fiber.context.services.set(requirement.id, implementation)
+      return yield* effect
+    },
+  })
 }
 
 if (import.meta.vitest) {
   const { describe, it, expect, expectTypeOf } = import.meta.vitest
 
-  class Random extends RequirementFactory('MyRandomService')<
+  class Random extends Service('MyRandomService')<
     Random,
     { readonly next: Effect<number> }
   >() {}

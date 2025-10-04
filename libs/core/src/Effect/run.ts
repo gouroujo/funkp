@@ -5,7 +5,8 @@ import type { Effect } from './types'
 export function runPromise<Success, Failure>(
   effect: Effect<Success, Failure, never>,
 ) {
-  return pipe(createFiber(effect), runFiber(), wait())
+  const fiber = createFiber(effect) // TODO: Get the current fiber
+  return pipe(fiber, runFiber(), wait())
 }
 
 if (import.meta.vitest) {

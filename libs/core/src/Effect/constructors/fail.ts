@@ -1,5 +1,5 @@
-import { put } from '../../Channel'
-import * as E from '../../Either'
+import { left } from '../../Either'
+import { pure } from '../../Fiber/instructions'
 import type { Effect } from '../types'
 
 export const fail = <Failure>(
@@ -7,7 +7,7 @@ export const fail = <Failure>(
 ): Effect<never, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield put(E.left(failure))
+      return yield* pure(left(failure))
     },
   }
 }

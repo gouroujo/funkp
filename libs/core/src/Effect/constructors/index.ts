@@ -1,5 +1,6 @@
 export * from './async'
 export * from './delay'
 export * from './fail'
+export * from './fetch'
 export * from './generator'
 export * from './succeed'

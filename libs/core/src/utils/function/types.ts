@@ -6,6 +6,7 @@ export type UnaryFunction<TIn = any, TOut = any> = (arg: TIn) => TOut
 export type FunctionInput<F extends UnaryFunction> = Parameters<F>[0]
 export type FunctionOutput<F extends UnaryFunction> = ReturnType<F>
 export type Predicate<T = any> = (value: T) => boolean
+export type AsyncFunction<TReturn = any> = () => Promise<TReturn>
 
 export type Invariant<A> = (_: A) => A
 export type InvariantType<A> = A extends Invariant<infer U> ? U : never

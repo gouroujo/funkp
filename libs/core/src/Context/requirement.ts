@@ -1,32 +1,31 @@
-export type Requirement = {
-  _tag: 'requirement'
-  id: string
-}
+import { inject } from '../Fiber/instructions'
 
-export type FilterRequirement<T> = T extends Requirement ? T : never
+export type ServiceType = ReturnType<typeof inject>
 
-export const RequirementFactory =
+export type FilterRequirement<T> = T extends ServiceType ? T : never
+
+export const Service =
   (id: string) =>
   <Self, Shape>() => {
-    return class implements Requirement {
-      _tag = 'requirement' as const
-      id: string = id
+    return class implements ServiceType {
+      value = id
+      _action = 'inject' as const
+      id = id
       static id = id
-      static _tag = 'requirement' as const
       static *[Symbol.iterator](): Generator<Self, Shape, Shape> {
-        return yield { _tag: 'requirement', id } as Self
+        return yield inject(id) as Self
       }
     }
   }
 
-export const isRequirement = (value: unknown): value is Requirement =>
-  typeof value === 'object' &&
-  value !== null &&
-  '_tag' in value &&
-  value._tag === 'requirement'
+// export const isRequirement = (value: unknown): value is Requirement =>
+//   typeof value === 'object' &&
+//   value !== null &&
+//   '_tag' in value &&
+//   value._tag === 'requirement'
 
-export type RequirementContainer<Shape = any> = {
-  new (): Requirement
+export type ServiceContainer<Shape = any> = {
+  new (): ServiceType
   id: string
-  [Symbol.iterator](): Generator<Requirement, Shape, Shape>
+  [Symbol.iterator](): Generator<ServiceType, Shape, Shape>
 }

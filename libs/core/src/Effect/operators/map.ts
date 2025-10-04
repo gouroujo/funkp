@@ -1,5 +1,4 @@
 import type { Effect } from '..'
-import { put, take } from '../../Channel'
 import { mapLeft, mapRight } from '../../Either'
 
 export const map = <Success, MappedSucces, Failure, Requirements>(
@@ -9,9 +8,7 @@ export const map = <Success, MappedSucces, Failure, Requirements>(
 ) => Effect<MappedSucces, Failure, Requirements>) => {
   return (effect) => ({
     *[Symbol.iterator]() {
-      yield* effect
-      const value = yield take()
-      return yield put(mapRight(fn)(value))
+      return mapRight(fn)(yield* effect)
     },
   })
 }
@@ -22,9 +19,7 @@ export const mapError = <Success, MappedFailure, Failure, Requirements>(
 ) => Effect<Success, MappedFailure, Requirements>) => {
   return (effect) => ({
     *[Symbol.iterator]() {
-      yield* effect
-      const value = yield take()
-      return yield put(mapLeft(fn)(value))
+      return mapLeft(fn)(yield* effect)
     },
   })
 }
@@ -47,6 +42,17 @@ if (import.meta.vitest) {
       const result = await runPromise(effect)
       expect(result).toEqual({ _tag: 'Right', right: (123 + 1) * 2 - 3 })
     })
+    // it('should map values async', async () => {
+    //   const effect = pipe(
+    //     succeed(123),
+    //     map((v) => Promise.resolve(v + 1)),
+    //     map(async (v) => await Promise.resolve(v * 2)),
+    //     map((v) => v - 3),
+    //   )
+    //   expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
+    //   const result = await runPromise(effect)
+    //   expect(result).toEqual({ _tag: 'Right', right: (123 + 1) * 2 - 3 })
+    // })
   })
   describe('Effect.mapLeft', async () => {
     const runPromise = (await import('../run')).runPromise

@@ -1,7 +1,6 @@
+import { createContext } from 'src/Context'
 import { nominal } from '../Brand'
-import { chan } from '../Channel'
 import type { Effect } from '../Effect'
-import type * as E from '../Either'
 import type { Fiber, FiberId } from './fiber'
 
 const generateFiberId = () => {
@@ -11,15 +10,16 @@ const generateFiberId = () => {
 
 export function createFiber<Success, Failure>(
   effect: Effect<Success, Failure, never>,
-  parentId?: FiberId,
+  parent?: Fiber<unknown, unknown>,
 ): Fiber<Success, Failure> {
   const id = generateFiberId()
-  const channel = chan<E.Either<Failure, any>>(1, { strategy: 'sliding' })
   return {
     id,
-    ...(parentId ? { parentId } : {}),
+    ...(parent ? { parent } : {}),
     childs: [],
+    listeners: [],
     effect,
-    channel,
+    status: 'suspended',
+    context: parent ? {} : createContext(),
   }
 }
