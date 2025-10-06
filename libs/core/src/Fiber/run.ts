@@ -1,9 +1,14 @@
 import { absurd } from 'src/functions'
 import { Either } from '../Either'
+import { curryLeft } from '../utils/function/curry'
 import type { Fiber } from './fiber'
-import { forkFiber } from './fork'
 import { INJECT_FIBER } from './inject'
-import { Instruction } from './instructions'
+import {
+  forkHandler,
+  Instruction,
+  sleepHandler,
+  waitHandler,
+} from './instructions'
 
 export const runFiber =
   <Success, Failure>() =>
@@ -19,40 +24,36 @@ export const runFiber =
         return
       }
       const state = generator.next(prevValue)
+      const next = curryLeft(_run, generator)
       if (!state.done) {
         const instruction = state.value
-        switch (instruction._action) {
+        switch (instruction._tag) {
           case 'wait':
-            {
-              const promise = instruction.value
-              promise.then((v) => setImmediate(() => _run(generator, v)))
-              // .catch((e) => generator.throw && run(generator.throw(e)))
-            }
+            waitHandler(next, instruction.value, fiber)
             break
           case 'pure':
-            setImmediate(() => _run(generator, instruction.value))
+            setImmediate(() => next(instruction.value))
             break
           case 'fork': {
-            const child = forkFiber(instruction.value)(fiber)
-            setImmediate(() => _run(generator, child))
+            forkHandler(next, instruction.value, fiber)
             break
           }
           case 'inject': {
             switch (instruction.value) {
               case INJECT_FIBER:
-                setImmediate(() => _run(generator, fiber))
+                setImmediate(() => next(fiber))
                 break
               default:
                 setImmediate(() =>
-                  _run(
-                    generator,
-                    fiber.context.services?.get(instruction.value),
-                  ),
+                  next(fiber.context.services?.get(instruction.value)),
                 )
             }
             break
           }
-          case 'stop': {
+          case 'sleep':
+            sleepHandler(next, instruction.value, fiber)
+            break
+          case 'interrupt': {
             break
           }
           default:

@@ -1,5 +1,5 @@
 import { left, right } from '../../Either'
-import { suspend } from '../../Fiber/instructions'
+import { wait } from '../../Fiber/instructions'
 import type { Effect } from '../types'
 
 export const promise = <Success>(
@@ -7,7 +7,7 @@ export const promise = <Success>(
 ): Effect<Success, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield* suspend(promiseFn().then(right))
+      return yield wait(promiseFn().then(right))
     },
   }
 }
@@ -18,7 +18,7 @@ export const tryCatch = <Success, Failure>(
 ): Effect<Success, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield* suspend(
+      return yield wait(
         promiseFn()
           .then(right)
           .catch((e) => left(catchFn(e))),

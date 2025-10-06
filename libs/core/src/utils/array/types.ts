@@ -5,6 +5,9 @@ export type TupleRest<T extends unknown[]> = T[TupleRestKey<T>]
 export type Tail<T extends unknown[]> = T extends [unknown, ...infer TT]
   ? TT
   : []
+export type Head<T extends unknown[]> = T extends [infer TT, ...unknown[]]
+  ? TT
+  : never
 export type Last<T extends unknown[]> = T[number extends T['length']
   ? TupleRestKey<T> | TupleRestKey<Tail<T>>
   : Tail<T>['length']]

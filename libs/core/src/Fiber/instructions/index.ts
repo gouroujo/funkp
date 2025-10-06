@@ -1,19 +1,21 @@
-import { T } from 'vitest/dist/chunks/environment.d.cL3nLXbE.js'
 import type { ForkInstruction } from './fork'
-import type { inject } from './inject'
+import type { InjectInstruction } from './inject'
+import type { InterruptInstruction } from './interrupt'
 import type { PureInstruction } from './pure'
-import type { stop } from './stop'
-import type { SuspendInstruction } from './suspend'
+import type { SleepInstruction } from './sleep'
+import type { WaitInstruction } from './wait'
 
 export * from './fork'
 export * from './inject'
+export * from './interrupt'
 export * from './pure'
-export * from './stop'
-export * from './suspend'
+export * from './sleep'
+export * from './wait'
 
 export type Instruction =
-  | ReturnType<typeof inject<T>>
-  | SuspendInstruction
-  | ReturnType<typeof stop<T>>
+  | InjectInstruction
+  | WaitInstruction
+  | InterruptInstruction
   | ForkInstruction
-  | PureInstruction<any>
+  | PureInstruction
+  | SleepInstruction

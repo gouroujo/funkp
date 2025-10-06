@@ -7,7 +7,7 @@ export const fail = <Failure>(
 ): Effect<never, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield* pure(left(failure))
+      return yield pure(left(failure))
     },
   }
 }

@@ -1,6 +1,6 @@
 import * as E from '../../Either'
 import { runFiber, wait } from '../../Fiber'
-import { fork, suspend } from '../../Fiber/instructions'
+import { fork, wait as suspend } from '../../Fiber/instructions'
 import { pipe } from '../../functions'
 import { AsyncFunction } from '../../utils/function/types'
 import { promise, succeed } from '../constructors'
@@ -30,12 +30,12 @@ export function all<E extends Effect<unknown, unknown, unknown>[]>(
       const tasks: AsyncFunction[] = []
       for (let index = 0; index < effects.length; index++) {
         const effect = effects[index]
-        const fiber = yield* fork(effect)
+        const fiber = yield fork(effect)
         tasks.push(() => {
           return pipe(fiber, runFiber(), wait())
         })
       }
-      const result = yield* suspend(
+      const result = yield suspend(
         semaphore(concurrency(options?.concurrency))(tasks),
       )
       return E.all(result) as E.Either<Failure<Union<E>>, SuccessMap<E>>

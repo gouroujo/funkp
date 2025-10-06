@@ -1,19 +1,15 @@
-import { Effect } from '../../Effect'
-import { Fiber } from '../fiber'
+import type { Effect } from '../../Effect'
+import { forkFiber } from '../fork'
+import { instruct, Instruct, InstructionHandler } from './types'
 
-export type ForkInstruction<Success = unknown, Failure = unknown> = {
-  _action: 'fork'
-  value: Effect<Success, Failure, never>
+export const fork = instruct<'fork', Effect<any, any, any>>('fork')
+export type ForkInstruction = Instruct<typeof fork>
+
+export const forkHandler: InstructionHandler<typeof fork> = (
+  next,
+  value,
+  fiber,
+) => {
+  const child = forkFiber(value)(fiber)
+  setImmediate(() => next(child))
 }
-
-export const fork = <Success, Failure>(
-  value: Effect<Success, Failure, never>,
-) => ({
-  *[Symbol.iterator](): Generator<
-    ForkInstruction<Success, Failure>,
-    Fiber<Success, Failure>,
-    Fiber<Success, Failure>
-  > {
-    return yield { _action: 'fork', value }
-  },
-})

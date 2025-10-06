@@ -6,7 +6,7 @@ export function forkFiber<Success, Failure>(
   effect: Effect<Success, Failure, never>,
 ) {
   return (parent: Fiber<any, any>) => {
-    const child = createFiber(effect, parent.id)
+    const child = createFiber(effect, parent)
     parent.childs.push(child)
     return child
   }

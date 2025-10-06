@@ -31,7 +31,7 @@ export const semaphore = (concurrency: number) => {
         return
       })
     }
-    const promises = new Array(concurrency)
+    const promises = new Array(Math.min(concurrency, tasks.length + 1))
       .fill(null)
       .map(() => run(worker<Awaited<ReturnType<T[number]>>>()))
     return Promise.all(promises).then(() => results as ReturnMap<T>)
