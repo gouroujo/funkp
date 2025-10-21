@@ -1,13 +1,14 @@
-import { Effect } from '../Effect'
-import { createFiber } from './create'
-import { Fiber } from './fiber'
+import * as Effect from '../Effect'
+import * as RuntimeFiber from '../RuntimeFiber'
+import { pure } from '../RuntimeOp'
 
-export function forkFiber<Success, Failure>(
-  effect: Effect<Success, Failure, never>,
-) {
-  return (parent: Fiber<any, any>) => {
-    const child = createFiber(effect, parent)
-    parent.childs.push(child)
-    return child
+export const fork = <Success, Failure>(
+  effect: Effect.Effect<Success, Failure, never>,
+): Effect.Effect<RuntimeFiber.RuntimeFiber<Success, Failure>, never, never> => {
+  return {
+    *[Symbol.iterator]() {
+      const currentFiber = yield injectFiber()
+      return yield pure(RuntimeFiber.fork(currentFiber, effect))
+    },
   }
 }

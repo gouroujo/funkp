@@ -1,18 +1,18 @@
 import type { FilterRequirement, ServiceType } from '../../Context'
 import type { Either } from '../../Either'
-import { Instruction } from '../../Fiber/instructions'
+import type { Operation } from '../../RuntimeOp'
 import type { Effect } from '../types'
 
 export function gen<
   Success,
   Failure = never,
-  YieldingValues extends ServiceType | Instruction = never,
+  YieldingValues extends ServiceType | Operation = never,
 >(
-  genFn: () => Generator<YieldingValues, Either<Failure, Success>, any>,
+  genFn: () => Generator<YieldingValues, Either<Failure, Success>, unknown>,
 ): Effect<Success, Failure, FilterRequirement<YieldingValues>> {
   return {
     *[Symbol.iterator]() {
-      return yield* genFn() as any
+      return yield* genFn()
     },
   }
 }
@@ -22,7 +22,8 @@ if (import.meta.vitest) {
 
   describe('Effect.gen', async () => {
     const { map } = await import('../operators')
-    const { succeed, fail } = await import('.')
+    const { succeed } = await import('./succeed')
+    const { fail } = await import('./fail')
     const { runPromise } = await import('../run')
     const { pipe } = await import('../../functions')
     const E = await import('../../Either')
@@ -45,7 +46,7 @@ if (import.meta.vitest) {
         Effect<'Combined: effect1, effect2', never, never>
       >()
       const result = await runPromise(combined)
-      expect(result).toEqualRight('Combined: effect1, effect2')
+      expect(result).toEqual('Combined: effect1, effect2')
     })
     it('should combine effect that fail', async () => {
       const combined = pipe(
@@ -59,8 +60,7 @@ if (import.meta.vitest) {
       )
 
       expectTypeOf(combined).toEqualTypeOf<Effect<never, 'fail', never>>()
-      const result = await runPromise(combined)
-      expect(result).toEqualLeft('fail')
+      await expect(runPromise(combined)).rejects.toEqual('fail')
     })
 
     it('should combine with async effect', async () => {
@@ -76,7 +76,7 @@ if (import.meta.vitest) {
         map((a) => a),
       )
       const result = await runPromise(effect)
-      expect(result).toEqualRight('Combined: effect1, async part')
+      expect(result).toEqual('Combined: effect1, async part')
     })
   })
 }

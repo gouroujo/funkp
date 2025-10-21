@@ -1,5 +1,4 @@
-import { left, right } from '../../Either'
-import { wait } from '../../Fiber/instructions'
+import { async } from '../../RuntimeOp'
 import type { Effect } from '../types'
 
 export const promise = <Success>(
@@ -7,7 +6,7 @@ export const promise = <Success>(
 ): Effect<Success, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield wait(promiseFn().then(right))
+      return yield async(promiseFn())
     },
   }
 }
@@ -18,11 +17,7 @@ export const tryCatch = <Success, Failure>(
 ): Effect<Success, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield wait(
-        promiseFn()
-          .then(right)
-          .catch((e) => left(catchFn(e))),
-      )
+      return yield async(promiseFn().catch((e) => catchFn(e)))
     },
   }
 }
@@ -30,12 +25,12 @@ export const tryCatch = <Success, Failure>(
 if (import.meta.vitest) {
   const { describe, it, expect, expectTypeOf } = import.meta.vitest
 
-  describe('Promise constructor', async () => {
+  describe('Effect.promise', async () => {
     const runPromise = (await import('../run')).runPromise
     it('should handle async resolve', async () => {
       const effect = promise(() => Promise.resolve('async result' as const))
       expectTypeOf(effect).toEqualTypeOf<Effect<'async result', never, never>>()
-      await expect(runPromise(effect)).resolves.toEqualRight('async result')
+      await expect(runPromise(effect)).resolves.toEqual('async result')
     })
 
     it.skip('should throw on failure', async () => {
@@ -44,7 +39,7 @@ if (import.meta.vitest) {
     })
   })
 
-  describe('Try-Promise constructor', async () => {
+  describe('Effect.tryCatch', async () => {
     const runPromise = (await import('../run')).runPromise
     it('should handle async failure', async () => {
       const effect = tryCatch(
@@ -52,9 +47,7 @@ if (import.meta.vitest) {
         (error) => 'error: ' + error,
       )
       expectTypeOf(effect).toEqualTypeOf<Effect<never, string, never>>()
-      await expect(runPromise(effect)).resolves.toEqualLeft(
-        'error: async error',
-      )
+      await expect(runPromise(effect)).resolves.toEqual('error: async error')
     })
   })
 }

@@ -1,5 +1,6 @@
 import type { Effect } from '..'
 import { mapLeft, mapRight } from '../../Either'
+import { sync } from '../../RuntimeOp'
 
 export const map = <Success, MappedSucces, Failure, Requirements>(
   fn: (value: Success) => MappedSucces,
@@ -8,7 +9,7 @@ export const map = <Success, MappedSucces, Failure, Requirements>(
 ) => Effect<MappedSucces, Failure, Requirements>) => {
   return (effect) => ({
     *[Symbol.iterator]() {
-      return mapRight(fn)(yield* effect)
+      return yield sync(mapRight(fn)(yield* effect))
     },
   })
 }
@@ -19,7 +20,7 @@ export const mapError = <Success, MappedFailure, Failure, Requirements>(
 ) => Effect<Success, MappedFailure, Requirements>) => {
   return (effect) => ({
     *[Symbol.iterator]() {
-      return mapLeft(fn)(yield* effect)
+      return yield sync(mapLeft(fn)(yield* effect))
     },
   })
 }
@@ -39,8 +40,7 @@ if (import.meta.vitest) {
         map((v) => v - 3),
       )
       expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
-      const result = await runPromise(effect)
-      expect(result).toEqual({ _tag: 'Right', right: (123 + 1) * 2 - 3 })
+      await expect(runPromise(effect)).resolves.toEqual((123 + 1) * 2 - 3)
     })
     // it('should map values async', async () => {
     //   const effect = pipe(
@@ -54,7 +54,7 @@ if (import.meta.vitest) {
     //   expect(result).toEqual({ _tag: 'Right', right: (123 + 1) * 2 - 3 })
     // })
   })
-  describe('Effect.mapLeft', async () => {
+  describe('Effect.mapError', async () => {
     const runPromise = (await import('../run')).runPromise
     const fail = (await import('../constructors/fail')).fail
     const pipe = (await import('../../functions/pipe')).pipe
@@ -67,8 +67,7 @@ if (import.meta.vitest) {
         mapError((v) => v - 3),
       )
       expectTypeOf(effect).toEqualTypeOf<Effect<never, number, never>>()
-      const result = await runPromise(effect)
-      expect(result).toEqual({ _tag: 'Left', left: (123 + 1) * 2 - 3 })
+      await expect(runPromise(effect)).rejects.toEqual((123 + 1) * 2 - 3)
     })
   })
 }

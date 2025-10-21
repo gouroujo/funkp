@@ -1,5 +1,4 @@
-import { left } from '../../Either'
-import { pure } from '../../Fiber/instructions'
+import { fail as _fail } from '../../RuntimeOp'
 import type { Effect } from '../types'
 
 export const fail = <Failure>(
@@ -7,7 +6,7 @@ export const fail = <Failure>(
 ): Effect<never, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield pure(left(failure))
+      return yield _fail(failure)
     },
   }
 }
@@ -20,20 +19,17 @@ if (import.meta.vitest) {
     it('should fail with the provided number', async () => {
       const effect = fail(123)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, number, never>>()
-      const result = await runPromise(effect)
-      expect(result).toEqualLeft(123)
+      await expect(runPromise(effect)).rejects.toEqual(123)
     })
     it('should fail with the provided string', async () => {
       const effect = fail('foo' as const)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, 'foo', never>>()
-      const result = await runPromise(effect)
-      expect(result).toEqualLeft('foo')
+      await expect(runPromise(effect)).rejects.toEqual('foo')
     })
     it('should fail with the provided number', async () => {
       const effect = fail(true)
       expectTypeOf(effect).toEqualTypeOf<Effect<never, boolean, never>>()
-      const result = await runPromise(effect)
-      expect(result).toEqualLeft(true)
+      await expect(runPromise(effect)).rejects.toEqual(true)
     })
   })
 }

@@ -1,5 +1,7 @@
 export * from './array'
 export * from './function'
 export * from './generator'
+export * as HKT from './HKT'
 export * from './iterable'
 export * from './object'
+export * as Tuple from './tuple'

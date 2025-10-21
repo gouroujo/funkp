@@ -1,12 +1,10 @@
-import { right } from '../../Either'
-import { sleep as _sleep } from '../../Fiber/instructions'
+import { sleep as _sleep } from '../../RuntimeOp'
 import type { Effect } from '../types'
 
 export const sleep = (ms: number): Effect<void, never, never> => {
   return {
     *[Symbol.iterator]() {
-      yield _sleep(ms)
-      return right(undefined)
+      return yield _sleep(ms)
     },
   }
 }
@@ -22,12 +20,10 @@ if (import.meta.vitest) {
     })
 
     it('should resolve after the specified delay', async () => {
-      const effect = sleep(50)
       const start = Date.now()
-      const result = await runPromise(effect)
+      await runPromise(sleep(50))
       const elapsed = Date.now() - start
-      expect(result).toEqualRight(undefined)
-      expect(elapsed).toBeGreaterThanOrEqual(45)
+      expect(elapsed).toBeGreaterThanOrEqual(50)
     })
   })
 }
