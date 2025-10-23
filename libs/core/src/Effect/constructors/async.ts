@@ -1,4 +1,4 @@
-import { async } from '../../RuntimeOp'
+import { promise } from '../../RuntimeOp'
 import type { Effect } from '../types'
 
 export const promise = <Success>(
@@ -6,7 +6,7 @@ export const promise = <Success>(
 ): Effect<Success, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield async(promiseFn())
+      return yield promise(promiseFn())
     },
   }
 }
@@ -17,7 +17,7 @@ export const tryCatch = <Success, Failure>(
 ): Effect<Success, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield async(promiseFn().catch((e) => catchFn(e)))
+      return yield promise(promiseFn().catch((e) => catchFn(e)))
     },
   }
 }

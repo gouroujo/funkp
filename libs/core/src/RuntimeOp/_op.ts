@@ -2,7 +2,7 @@ import { Either } from '../Either'
 import { Runtime } from '../Runtime'
 
 export interface Operation<T = unknown> {
-  _op: string
+  _op: string | symbol
   value?: T
 }
 

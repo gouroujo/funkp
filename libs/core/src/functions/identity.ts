@@ -37,6 +37,6 @@ if (import.meta.vitest) {
 
     const inputArray = [1, 2, 3]
     const resultArray = identity(inputArray)
-    expect(resultArray).toEqual(inputArray)
+    expect(resultArray).toBe(inputArray)
   })
 }

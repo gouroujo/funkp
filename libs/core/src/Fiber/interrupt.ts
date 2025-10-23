@@ -1,4 +1,4 @@
-import { async, pure } from 'src/RuntimeOp'
+import { promise, pure } from 'src/RuntimeOp'
 import * as Effect from '../Effect'
 import type { Exit } from '../Exit'
 import * as RuntimeFiber from '../RuntimeFiber'
@@ -8,7 +8,7 @@ export const interrupt = <Success, Failure>(
 ): Effect.Effect<Exit<Success, Failure>, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield async(RuntimeFiber.interrupt(fiber))
+      return yield promise(RuntimeFiber.interrupt(fiber))
     },
   }
 }

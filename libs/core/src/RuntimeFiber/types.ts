@@ -16,6 +16,7 @@ export interface RuntimeFiber<Success, Failure> {
   effect: Effect<Success, Failure, never>
   status: RuntimeFiberStatus
   result?: Exit<Success, Failure>
+  sync: boolean
   listeners: Array<
     [
       resolve: (exit: Exit<Success, Failure>) => void,

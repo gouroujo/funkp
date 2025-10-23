@@ -1,5 +1,5 @@
-import { Last } from 'src/utils/array/types'
-import { UnaryFunction } from 'src/utils/function/types'
+import { UnaryFunction } from '../utils/function/types'
+import { Last } from '../utils/tuple'
 
 type PipeFns<
   P,
@@ -15,6 +15,8 @@ type PipeFns<
     : Fns[I]
 }
 
+export function pipe<TIn>(arg: TIn): TIn
+export function pipe<TIn, TOut>(arg: TIn, f0: UnaryFunction<TIn, TOut>): TOut
 export function pipe<TIn, T1, TOut>(
   arg: TIn,
   f0: UnaryFunction<TIn, T1>,
@@ -4401,15 +4403,25 @@ export function pipe<P, Fns extends [UnaryFunction<P>, ...UnaryFunction[]]>(
 }
 
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
+  const { it, describe, expect } = import.meta.vitest
 
-  it('should apply functions in sequence', () => {
-    const result = pipe(
-      'hello',
-      (s) => s.length,
-      (n) => n * 2,
-      (n) => n.toString(),
-    )
-    expect(result).toBe('10')
+  describe('functions.pipe', () => {
+    it('should apply functions in sequence', () => {
+      const result = pipe(
+        'hello',
+        (s) => s.length,
+        (n) => n * 2,
+        (n) => n.toString(),
+      )
+      expect(result).toBe('10')
+    })
+    it('should accept one argument', () => {
+      const result = pipe('hello')
+      expect(result).toBe('hello')
+    })
+    it('should accept two argument', () => {
+      const result = pipe('hello', (s) => s.length)
+      expect(result).toBe(5)
+    })
   })
 }

@@ -1,6 +1,6 @@
 import { Operation } from './_op'
 
-export const YIELD_OP = 'YIELD_OP' as const
+export const YIELD_OP = Symbol('YIELD_OP')
 export const coopYield = (): CooperativeYieldingOperation => ({
   _op: YIELD_OP,
 })
