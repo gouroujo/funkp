@@ -1,9 +1,10 @@
-import * as E from '../../Either'
-import { runFiber, wait } from '../../Fiber'
-import { fork, wait as suspend } from '../../Fiber/instructions'
-import { pipe } from '../../functions'
+import * as Exit from '../../Exit'
+import * as RuntimeFiber from '../../RuntimeFiber'
+import * as Op from '../../RuntimeOp'
 import { AsyncFunction } from '../../utils/function/types'
 import { promise, succeed } from '../constructors'
+import { fork } from '../operators'
+
 import {
   type Effect,
   type Failure,
@@ -28,17 +29,21 @@ export function all<E extends Effect<unknown, unknown, unknown>[]>(
   return {
     *[Symbol.iterator]() {
       const tasks: AsyncFunction[] = []
-      for (let index = 0; index < effects.length; index++) {
-        const effect = effects[index]
-        const fiber = yield fork(effect)
-        tasks.push(() => {
-          return pipe(fiber, runFiber(), wait())
+      const runtime = yield Op.withRuntime()
+      for (const effect of effects) {
+        const fiber = yield* fork(effect)
+        tasks.push(async () => {
+          RuntimeFiber.runLoop(fiber, runtime)
+          const exit = await RuntimeFiber.await(fiber)
+          return Exit.isSuccess(exit)
+            ? exit.success
+            : Promise.reject(exit.failure)
         })
       }
-      const result = yield suspend(
+      const result = yield Op.promise(
         semaphore(concurrency(options?.concurrency))(tasks),
       )
-      return E.all(result) as E.Either<Failure<Union<E>>, SuccessMap<E>>
+      return result
     },
   }
 }
@@ -68,11 +73,11 @@ if (import.meta.vitest) {
         Effect<['a', 'b', 'c'], never, never>
       >()
       const result = await runPromise(numbered)
-      expect(result).toEqualRight(['a', 'b', 'c'])
+      expect(result).toEqual(['a', 'b', 'c'])
     })
     it('should combine async effect run concurrently', async () => {
       const task1 = makeAsyncEffect('a' as const, 2)
-      const task2 = makeAsyncEffect('b' as const, 3)
+      const task2 = makeAsyncEffect('b' as const, 10)
       const task3 = makeAsyncEffect('c' as const, 1)
 
       const numbered = all([task1, task2, task3], {
@@ -82,7 +87,7 @@ if (import.meta.vitest) {
         Effect<['a', 'b', 'c'], never, never>
       >()
       const result = await runPromise(numbered)
-      expect(result).toEqualRight(['a', 'b', 'c'])
+      expect(result).toEqual(['a', 'b', 'c'])
     })
   })
 }

@@ -1,26 +1,20 @@
-import { right } from '../Either'
-import { Operation } from './_op'
+import type { Operation } from './_op'
 
-export const ASYNC_OP = Symbol('@funkp/core/operator/promise')
-export const promise = <T>(value: Promise<T>) => ({
-  _op: ASYNC_OP,
-  value,
-})
-
-export interface AsyncOperation extends Operation {
-  _op: typeof ASYNC_OP
-  value: Promise<unknown>
-}
-export const asyncHandler = (op: AsyncOperation) => op.value.then(right)
+export const ASYNC_OP = '@funkp/core/operator/async' as const
+export const promise = <T>(value: Promise<T>) =>
+  ({
+    _op: ASYNC_OP,
+    value,
+  }) satisfies Operation<Promise<T>>
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
-  describe('Operation.Fail', () => {
-    it('should return a fail operation', () => {
-      const operation = promise(Promise.resolve(42))
+  describe('Operation.Async', () => {
+    it('should return a async operation', () => {
+      const operation = promise(Promise.resolve('ok'))
       expect(operation).toMatchInlineSnapshot(`
         {
-          "_op": "async",
+          "_op": "@funkp/core/operator/async",
           "value": Promise {},
         }
       `)

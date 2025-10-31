@@ -1,10 +1,10 @@
-import { Exit } from '../Exit'
-import wait from './await'
+import * as Exit from '../Exit'
 import { RuntimeFiber } from './types'
 
 export const interrupt = <Success, Failure>(
   fiber: RuntimeFiber<Success, Failure>,
-): Promise<Exit<Success, Failure>> => {
+): Promise<void> => {
   fiber.status = 'interrupted'
-  return wait(fiber)
+  fiber.listeners.forEach(([resolve]) => resolve(Exit.interrupted(fiber)))
+  return Promise.resolve()
 }

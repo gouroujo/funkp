@@ -1,4 +1,5 @@
-import { pure } from '../../RuntimeOp'
+import * as Op from '../../RuntimeOp'
+
 import type { Effect } from '../types'
 
 export const succeed = <Success>(
@@ -6,7 +7,7 @@ export const succeed = <Success>(
 ): Effect<Success, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield pure(value)
+      return yield Op.pure(value)
     },
   }
 }

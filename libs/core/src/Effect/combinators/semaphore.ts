@@ -1,13 +1,13 @@
-export type AsyncTask<TReturn = any> = () => Promise<TReturn>
+export type AsyncTask<TReturn = unknown> = () => Promise<TReturn>
 
-async function* worker<T extends AsyncTask<any>>(): AsyncGenerator<
+async function* worker<T extends AsyncTask<unknown>>(): AsyncGenerator<
   [number, Awaited<ReturnType<T>>] | null,
   void,
   readonly [index: number, task: T] | undefined
 > {
   let task = yield null
   while (task) {
-    task = yield [task[0], await task[1]()]
+    task = yield [task[0], await (task[1]() as ReturnType<T>)]
   }
 }
 
@@ -16,7 +16,7 @@ type ReturnMap<E extends AsyncTask<unknown>[]> = {
 }
 
 export const semaphore = (concurrency: number) => {
-  return async <T extends AsyncTask<any>[]>(
+  return async <T extends AsyncTask[]>(
     tasks: readonly [...T],
   ): Promise<ReturnMap<T>> => {
     const t = tasks.map((task, i) => [i, task] as const)
@@ -33,7 +33,7 @@ export const semaphore = (concurrency: number) => {
     }
     const promises = new Array(Math.min(concurrency, tasks.length + 1))
       .fill(null)
-      .map(() => run(worker<Awaited<ReturnType<T[number]>>>()))
+      .map(() => run(worker<T[number]>()))
     return Promise.all(promises).then(() => results as ReturnMap<T>)
   }
 }

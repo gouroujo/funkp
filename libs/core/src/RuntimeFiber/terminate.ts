@@ -1,21 +1,15 @@
-import { Either, isRight } from '../Either'
 import * as Exit from '../Exit'
 import { RuntimeFiber } from './types'
 
 export const terminate = <Success, Failure>(
   fiber: RuntimeFiber<Success, Failure>,
 ) => {
-  return (result: Either<Failure, Success>) => {
+  return (result: Exit.Exit<Success, Failure>) => {
     fiber.status = 'closed'
-    fiber.result = isRight(result)
-      ? Exit.succeed(result.right)
-      : Exit.fail(result.left)
+
+    fiber.result = result
     fiber.listeners.forEach(([resolve, reject]) => {
-      if (isRight(result)) {
-        resolve(Exit.succeed(result.right))
-      } else {
-        resolve(Exit.fail(result.left))
-      }
+      resolve(result)
     })
   }
 }

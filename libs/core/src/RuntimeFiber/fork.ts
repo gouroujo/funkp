@@ -3,7 +3,7 @@ import { create } from './create'
 import type { RuntimeFiber } from './types'
 
 export const fork = <Success, Failure>(
-  fiber: RuntimeFiber<unknown, unknown>,
+  fiber: RuntimeFiber<any, any>,
   effect: Effect<Success, Failure, never>,
 ): RuntimeFiber<Success, Failure> => {
   const child = create(effect, fiber)

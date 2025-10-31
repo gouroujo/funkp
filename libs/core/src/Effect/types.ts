@@ -11,11 +11,7 @@ export type Requirements<T extends Effect<unknown, unknown, any>> =
   T extends Effect<unknown, unknown, infer C> ? C : never
 
 export type Effect<Success, Failure = never, Requirements = never> = {
-  [Symbol.iterator](): Generator<
-    Operation<Success, Failure>,
-    Either<Failure, Success>,
-    any
-  >
+  [Symbol.iterator](): Generator<Operation<Failure>, Success, any>
 }
 
 export type EffectFromEither<E extends Either<any, any>> =

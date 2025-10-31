@@ -1,31 +1,21 @@
-import { Either } from '../Either'
-import { Operation } from './_op'
+import type { Operation } from './_op'
 
-export const sync = (value: Either<unknown, unknown>): SyncOperation => ({
-  _op: 'sync',
-  value,
-})
-export interface SyncOperation extends Operation {
-  _op: 'sync'
-  value: Either<unknown, unknown>
-}
-
-export const syncHandler = (op: SyncOperation) => op.value
+export const SYNC_OP = '@funkp/core/operator/sync' as const
+export const sync = <T>(value: T) =>
+  ({
+    _op: SYNC_OP,
+    value,
+  }) satisfies Operation<T>
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
-  describe('Operation.Fail', async () => {
-    const { right } = await import('../Either')
-
+  describe('Operation.Sync', () => {
     it('should return a sync operation', () => {
-      const operation = sync(right(42))
+      const operation = sync('aaa')
       expect(operation).toMatchInlineSnapshot(`
         {
-          "_op": "sync",
-          "value": {
-            "_tag": "Right",
-            "right": 42,
-          },
+          "_op": "@funkp/core/operator/sync",
+          "value": "aaa",
         }
       `)
     })

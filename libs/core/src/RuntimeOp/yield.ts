@@ -1,9 +1,21 @@
 import { Operation } from './_op'
 
-export const YIELD_OP = Symbol('YIELD_OP')
-export const coopYield = (): CooperativeYieldingOperation => ({
-  _op: YIELD_OP,
-})
-export interface CooperativeYieldingOperation extends Operation {
-  _op: typeof YIELD_OP
+export const YIELD_OP = '@funkp/core/operator/yield' as const
+export const yieldNow = () =>
+  ({
+    _op: YIELD_OP,
+  }) satisfies Operation<void>
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest
+  describe('Operation.YieldNow', () => {
+    it('should return a yield operation', () => {
+      const operation = yieldNow()
+      expect(operation).toMatchInlineSnapshot(`
+          {
+            "_op": "@funkp/core/operator/yield",
+          }
+        `)
+    })
+  })
 }

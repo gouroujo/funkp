@@ -1,3 +1,4 @@
+export * from './isEither'
 export * from './isLeft'
 export * from './isRight'
 

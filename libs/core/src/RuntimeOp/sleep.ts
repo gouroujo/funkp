@@ -1,29 +1,21 @@
-import { right } from '../Either'
-import { Operation } from './_op'
+import type { Operation } from './_op'
 
-export const sleep = (value: number): SleepOperation => ({
-  _op: 'sleep',
-  value,
-})
-export interface SleepOperation extends Operation {
-  _op: 'sleep'
-  value: number
-}
-
-export const sleepHandler = (op: SleepOperation) =>
-  new Promise((resolve) => setTimeout(resolve, op.value)).then(() =>
-    right(undefined),
-  )
+export const SLEEP_OP = '@funkp/core/operator/sleep' as const
+export const sleep = (ms: number) =>
+  ({
+    _op: SLEEP_OP,
+    value: ms,
+  }) satisfies Operation<number>
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
-  describe('Operation.Fail', () => {
-    it('should return a fail operation', () => {
-      const operation = sleep(42)
+  describe('Operation.Sleep', () => {
+    it('should return a sleep operation', () => {
+      const operation = sleep(10)
       expect(operation).toMatchInlineSnapshot(`
         {
-          "_op": "sleep",
-          "value": 42,
+          "_op": "@funkp/core/operator/sleep",
+          "value": 10,
         }
       `)
     })

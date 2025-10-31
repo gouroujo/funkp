@@ -1,4 +1,4 @@
-import { fail as _fail } from '../../RuntimeOp'
+import * as Op from '../../RuntimeOp'
 import type { Effect } from '../types'
 
 export const fail = <Failure>(
@@ -6,7 +6,7 @@ export const fail = <Failure>(
 ): Effect<never, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield _fail(failure)
+      throw yield Op.fail(failure)
     },
   }
 }

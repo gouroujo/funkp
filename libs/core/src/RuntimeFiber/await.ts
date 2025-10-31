@@ -3,7 +3,7 @@ import { RuntimeFiber } from './types'
 
 export default function <Success, Failure>(
   fiber: RuntimeFiber<Success, Failure>,
-) {
+): Promise<Exit<Success, Failure>> {
   return new Promise<Exit<Success, Failure>>((resolve, reject) => {
     if ('result' in fiber) {
       return resolve(fiber.result)

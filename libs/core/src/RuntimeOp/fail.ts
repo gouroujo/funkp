@@ -1,16 +1,11 @@
-import { left } from '../Either'
-import { Operation } from './_op'
+import type { Operation } from './_op'
 
-export const fail = (value: unknown): FailOperation => ({
-  _op: 'fail',
-  value,
-})
-export interface FailOperation extends Operation {
-  _op: 'fail'
-  value: unknown
-}
-
-export const failHandler = (op: FailOperation) => left(op.value)
+export const FAIL_OP = '@funkp/core/operator/fail' as const
+export const fail = <T>(value: T) =>
+  ({
+    _op: FAIL_OP,
+    value,
+  }) satisfies Operation<T>
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
@@ -19,7 +14,7 @@ if (import.meta.vitest) {
       const operation = fail('error')
       expect(operation).toMatchInlineSnapshot(`
         {
-          "_op": "fail",
+          "_op": "@funkp/core/operator/fail",
           "value": "error",
         }
       `)

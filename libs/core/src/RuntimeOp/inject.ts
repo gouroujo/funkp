@@ -1,37 +1,21 @@
-import { right } from '../Either'
-import { Runtime } from '../Runtime'
-import { Operation } from './_op'
+import type { Operation } from './_op'
 
-export const inject = (value: unknown): InjectOperation => ({
-  _op: 'inject',
-  value,
-})
-export interface InjectOperation extends Operation {
-  _op: 'inject'
-  value: unknown
-}
-
-export const injectHandler = (
-  op: InjectOperation,
-  runtime: Runtime<unknown>,
-) => {
-  const serviceMap = runtime.context.services
-  if (!serviceMap?.has(op.value)) {
-    throw new Error(`Service not found "${String(op.value)}"`)
-  } else {
-    return right(serviceMap.get(op.value))
-  }
-}
+export const INJECT_OP = '@funkp/core/operator/inject' as const
+export const inject = <T>(token: T) =>
+  ({
+    _op: INJECT_OP,
+    value: token,
+  }) satisfies Operation<T>
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
-  describe('Operation.Fail', () => {
-    it('should return a fail operation', () => {
-      const operation = inject('dep')
+  describe('Operation.Inject', () => {
+    it('should return a inject operation', () => {
+      const operation = inject('aaa')
       expect(operation).toMatchInlineSnapshot(`
         {
-          "_op": "inject",
-          "value": "dep",
+          "_op": "@funkp/core/operator/inject",
+          "value": "aaa",
         }
       `)
     })

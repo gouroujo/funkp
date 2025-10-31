@@ -1,4 +1,4 @@
-import { promise } from '../../RuntimeOp'
+import * as Op from '../../RuntimeOp'
 import type { Effect } from '../types'
 
 export const promise = <Success>(
@@ -6,7 +6,7 @@ export const promise = <Success>(
 ): Effect<Success, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield promise(promiseFn())
+      return yield Op.promise(promiseFn())
     },
   }
 }
@@ -17,7 +17,11 @@ export const tryCatch = <Success, Failure>(
 ): Effect<Success, Failure, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield promise(promiseFn().catch((e) => catchFn(e)))
+      try {
+        return yield Op.promise(promiseFn())
+      } catch (error: unknown) {
+        throw yield Op.fail(catchFn(error))
+      }
     },
   }
 }
@@ -47,7 +51,7 @@ if (import.meta.vitest) {
         (error) => 'error: ' + error,
       )
       expectTypeOf(effect).toEqualTypeOf<Effect<never, string, never>>()
-      await expect(runPromise(effect)).resolves.toEqual('error: async error')
+      await expect(runPromise(effect)).rejects.toEqual('error: async error')
     })
   })
 }

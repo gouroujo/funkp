@@ -1,10 +1,10 @@
-import { sleep as _sleep } from '../../RuntimeOp'
+import * as Op from '../../RuntimeOp'
 import type { Effect } from '../types'
 
 export const sleep = (ms: number): Effect<void, never, never> => {
   return {
     *[Symbol.iterator]() {
-      return yield _sleep(ms)
+      return yield Op.sleep(ms)
     },
   }
 }
