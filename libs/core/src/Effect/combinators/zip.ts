@@ -49,19 +49,26 @@ export function zipWith<
       >[] = []
       for (const effect of [a, b]) {
         const fiber = yield* fork(effect)
-        const i = promises.push(
-          RuntimeFiber.await(fiber).then((exit) =>
-            Exit.isSuccess(exit) ? exit.success : null,
-          ),
-        )
+        const i = promises.push(RuntimeFiber.await(fiber))
         if (options?.concurrent !== true) {
           yield Op.promise(promises[i - 1])
         }
       }
-      const result: [Success<A>, Success<B>] = yield Op.promise(
-        Promise.all(promises) as Promise<[Success<A>, Success<B>]>,
-      )
-      return fn(...result) as ReturnType<Fn>
+      try {
+        const result: [Success<A>, Success<B>] = yield Op.promise(
+          Promise.all(promises).then((exits) =>
+            exits.map((exit) => {
+              if (Exit.isSuccess(exit)) {
+                return exit.success
+              }
+              throw exit.failure
+            }),
+          ),
+        )
+        return fn(...result) as ReturnType<Fn>
+      } catch (error) {
+        throw yield Op.fail(error as Failure<A> | Failure<B>)
+      }
     },
   }
 }

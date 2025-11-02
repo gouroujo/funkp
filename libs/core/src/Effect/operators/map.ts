@@ -20,7 +20,11 @@ export const mapError = <Success, MappedFailure, Failure, Requirements>(
   return (effect) => ({
     *[Symbol.iterator]() {
       try {
-        return yield* effect
+        return yield* effect as unknown as Effect<
+          Success,
+          MappedFailure,
+          Requirements
+        >
       } catch (failure) {
         throw yield fail(fn(failure as Failure))
       }

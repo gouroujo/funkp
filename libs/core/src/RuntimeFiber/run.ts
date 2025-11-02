@@ -11,7 +11,7 @@ export const runLoop = <Success, Failure, Context>(
 ): RuntimeFiber<Success, Failure> => {
   const generator = fiber.effect[Symbol.iterator]()
 
-  void (function _go(state: IteratorResult<Operation, Success>): void {
+  void (function _go(state: IteratorResult<Operation<Failure>, Success>): void {
     if (state.done) return void terminate(fiber)(Exit.succeed(state.value))
     const op = state.value
     // console.log('RUN LOOP OP', op)
