@@ -96,7 +96,6 @@
     }
   },
   "dependencies": {
-    "@funkp/vitest": "0.0.1",
-    "vitest": "^3"
+    "@funkp/vitest": "0.0.1"
   }
 }

@@ -4,7 +4,7 @@ import type { Effect } from './types'
 export function interrupt(): Effect<never, never, never> {
   return {
     *[Symbol.iterator]() {
-      return yield Op.interrupt()
+      throw yield Op.interrupt()
     },
   }
 }

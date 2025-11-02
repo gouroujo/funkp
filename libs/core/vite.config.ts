@@ -1,8 +1,8 @@
 /// <reference types="vitest/config" />
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
 import * as path from 'path'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
   root: __dirname,
@@ -25,20 +25,21 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
   },
-  cacheDir: '../../node_modules/.vite/apps/my-app',
+  cacheDir: '../../node_modules/.vite/<project-root>',
 
   plugins: [
     dts({
-      entryRoot: 'src',
+      entryRoot: '.',
       tsconfigPath: path.join(__dirname, 'tsconfig.build.json'),
     }),
-    nxViteTsPaths(),
+    tsconfigPaths(),
+    // nxViteTsPaths({ // ----> Doesn't work well with typescript baseUrl
+    //   debug: true,
+    //   buildLibsFromSource: true,
+    // }),
   ],
   test: {
     globals: true,
-    cache: {
-      dir: '../node_modules/.vitest/<project-root>',
-    },
     includeSource: ['src/**/*.ts'],
     reporters: ['default'],
     setupFiles: ['./vite.setup.ts'],
