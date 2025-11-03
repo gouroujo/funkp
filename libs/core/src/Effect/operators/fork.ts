@@ -1,7 +1,7 @@
 import * as RuntimeFiber from '../../RuntimeFiber'
 import * as Op from '../../RuntimeOp'
 
-import { Effect } from '../types'
+import type { Effect } from '../types'
 
 export const fork = <Success, Failure>(
   effect: Effect<Success, Failure, never>,
@@ -23,7 +23,7 @@ if (import.meta.vitest) {
         : zipWith(
             suspend(() => fib(n - 1)),
             suspend(() => fib(n - 2)),
-            (a, b) => a + b,
+            ([a, b]) => a + b,
           )
 
     it('should fork an effect into a separate fiber', async () => {
@@ -33,7 +33,6 @@ if (import.meta.vitest) {
       const program = gen(function* () {
         const fiber = yield* fib10Fiber
         const n = yield* Fiber.join(fiber)
-        console.log('Fib(10) = ', n)
         return n
       })
       await expect(runPromise(program)).resolves.toBe(89)
