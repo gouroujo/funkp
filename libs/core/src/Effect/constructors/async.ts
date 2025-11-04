@@ -37,7 +37,7 @@ if (import.meta.vitest) {
       await expect(runPromise(effect)).resolves.toEqual('async result')
     })
 
-    it.skip('should throw on failure', async () => {
+    it('should throw on failure', async () => {
       const effect = promise(() => Promise.reject('async error' as const))
       await expect(runPromise(effect)).rejects.toEqual('async error')
     })

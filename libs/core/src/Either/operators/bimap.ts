@@ -48,25 +48,28 @@ export function bimap<L, R, L2, R2>(
 }
 
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
+  const { describe, it, expect, expectTypeOf } = import.meta.vitest
+  describe('Either.bimap', () => {
+    it('should map Left value', () => {
+      const l: Either<string, number> = left('error')
+      const mapBoth = bimap(
+        (l: string) => l.toUpperCase(),
+        (r: number) => r,
+      )
+      const result = mapBoth(l)
+      expectTypeOf(result).toEqualTypeOf<Either<string, number>>()
+      expect(result).toEqualLeft('ERROR')
+    })
 
-  it('should map Left value', () => {
-    const l: Either<string, number> = { _tag: 'Left', left: 'error' }
-    const mapBoth = bimap(
-      (l: string) => l.toUpperCase(),
-      (r: number) => r,
-    )
-    const result = mapBoth(l)
-    expect(result).toEqual({ _tag: 'Left', left: 'ERROR' })
-  })
-
-  it('should map Right value', () => {
-    const r: Either<string, number> = { _tag: 'Right', right: 42 }
-    const mapBoth = bimap(
-      (l: string) => l.toUpperCase(),
-      (r: number) => r * 2,
-    )
-    const result = mapBoth(r)
-    expect(result).toEqual({ _tag: 'Right', right: 84 })
+    it('should map Right value', () => {
+      const r: Either<string, number> = right(42)
+      const mapBoth = bimap(
+        (l: string) => l.toUpperCase(),
+        (r: number) => r * 2,
+      )
+      const result = mapBoth(r)
+      expectTypeOf(result).toEqualTypeOf<Either<string, number>>()
+      expect(result).toEqualRight(84)
+    })
   })
 }
