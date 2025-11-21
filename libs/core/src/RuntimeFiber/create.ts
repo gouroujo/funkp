@@ -1,3 +1,4 @@
+import { chan } from 'src/Channel'
 import type { Effect } from '../Effect'
 import { Id } from './id'
 import type { RuntimeFiber } from './types'
@@ -18,6 +19,7 @@ export function create<Success, Failure>(
     childs: [],
     effect,
     status: 'suspended',
+    channel: chan(1),
     listeners: [],
     sync: options?.sync ?? false,
   }

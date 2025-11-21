@@ -1,4 +1,4 @@
-import type { EffectFromEither } from '../types'
+import type { EffectFromEither } from '../effect'
 
 export const elevate = <F extends () => any>(operator: F) => {
   return (...args: Parameters<F>) => {

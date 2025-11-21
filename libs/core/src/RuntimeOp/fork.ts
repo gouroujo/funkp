@@ -1,12 +1,8 @@
-import type { Effect } from '../Effect'
-import type { Operation } from './_op'
-
 export const FORK_OP = '@funkp/core/operator/fork' as const
-export const fork = <T extends Effect<unknown, unknown, unknown>>(effect: T) =>
-  ({
-    _op: FORK_OP,
-    value: effect,
-  }) satisfies Operation<T>
+export const fork = <T>(effect: T) => ({
+  _op: FORK_OP,
+  value: effect,
+})
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest

@@ -1,14 +1,11 @@
 import * as Op from '../../RuntimeOp'
-import type { Effect } from '../types'
+import type { Effect } from '../effect'
+import { effectable } from '../internal/effectable'
 
 export const fail = <Failure>(
   failure: Failure,
 ): Effect<never, Failure, never> => {
-  return {
-    *[Symbol.iterator]() {
-      throw yield Op.fail(failure)
-    },
-  }
+  return effectable<never, Failure, never>([Op.fail(failure)])
 }
 
 if (import.meta.vitest) {

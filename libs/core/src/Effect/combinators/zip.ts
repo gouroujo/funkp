@@ -8,7 +8,7 @@ import {
   type Failure,
   type Requirements,
   type Success,
-} from '../types'
+} from '../effect'
 
 type Options = {
   concurrent?: boolean

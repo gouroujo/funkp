@@ -1,11 +1,12 @@
-import type { Operation } from './_op'
+import { Operation } from '.'
 
 export const FAIL_OP = '@funkp/core/operator/fail' as const
-export const fail = <T>(value: T) =>
-  ({
-    _op: FAIL_OP,
-    value,
-  }) satisfies Operation<T>
+export const fail = <Failure>(
+  failure: Failure,
+): Operation<never, Failure, never> => ({
+  _op: FAIL_OP,
+  failure,
+})
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
@@ -15,7 +16,7 @@ if (import.meta.vitest) {
       expect(operation).toMatchInlineSnapshot(`
         {
           "_op": "@funkp/core/operator/fail",
-          "value": "error",
+          "failure": "error",
         }
       `)
     })

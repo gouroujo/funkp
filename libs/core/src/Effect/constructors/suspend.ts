@@ -1,4 +1,4 @@
-import type { Effect } from '../types'
+import type { Effect } from '../effect'
 
 export const suspend = <Succcess, Failure, Requirements>(
   fn: () => Effect<Succcess, Failure, Requirements>,

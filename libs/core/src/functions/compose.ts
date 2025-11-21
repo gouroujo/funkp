@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Last } from 'src/utils/array/types'
 import { AnyFunc, UnaryFunction } from 'src/utils/function/types'
+import { Last } from 'src/utils/tuple'
 
 type FlowFns<
   Fns extends UnaryFunction[],
@@ -13,29 +13,29 @@ type FlowFns<
     : Fns[I]
 }
 
-export function flow<TIn extends any[], T1, TOut>(
+export function compose<TIn extends any[], T1, TOut>(
   f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<TIn extends any[], T1, T2, TOut>(
+export function compose<TIn extends any[], T1, T2, TOut>(
   f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<TIn extends any[], T1, T2, T3, TOut>(
+export function compose<TIn extends any[], T1, T2, T3, TOut>(
   f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<TIn extends any[], T1, T2, T3, T4, TOut>(
+export function compose<TIn extends any[], T1, T2, T3, T4, TOut>(
   f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
   f3: UnaryFunction<T3, T4>,
   f4: UnaryFunction<T4, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<TIn extends any[], T1, T2, T3, T4, T5, TOut>(
+export function compose<TIn extends any[], T1, T2, T3, T4, T5, TOut>(
   f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
@@ -43,7 +43,7 @@ export function flow<TIn extends any[], T1, T2, T3, T4, T5, TOut>(
   f4: UnaryFunction<T4, T5>,
   f5: UnaryFunction<T5, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, TOut>(
+export function compose<TIn extends any[], T1, T2, T3, T4, T5, T6, TOut>(
   f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
@@ -52,7 +52,7 @@ export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, TOut>(
   f5: UnaryFunction<T5, T6>,
   f6: UnaryFunction<T6, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, T7, TOut>(
+export function compose<TIn extends any[], T1, T2, T3, T4, T5, T6, T7, TOut>(
   f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
@@ -62,7 +62,18 @@ export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, T7, TOut>(
   f6: UnaryFunction<T6, T7>,
   f7: UnaryFunction<T7, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, T7, T8, TOut>(
+export function compose<
+  TIn extends any[],
+  T1,
+  T2,
+  T3,
+  T4,
+  T5,
+  T6,
+  T7,
+  T8,
+  TOut,
+>(
   f0: AnyFunc<TIn, T1>,
   f1: UnaryFunction<T1, T2>,
   f2: UnaryFunction<T2, T3>,
@@ -73,7 +84,7 @@ export function flow<TIn extends any[], T1, T2, T3, T4, T5, T6, T7, T8, TOut>(
   f7: UnaryFunction<T7, T8>,
   f8: UnaryFunction<T8, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -97,7 +108,7 @@ export function flow<
   f8: UnaryFunction<T8, T9>,
   f9: UnaryFunction<T9, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -123,7 +134,7 @@ export function flow<
   f9: UnaryFunction<T9, T10>,
   f10: UnaryFunction<T10, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -151,7 +162,7 @@ export function flow<
   f10: UnaryFunction<T10, T11>,
   f11: UnaryFunction<T11, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -181,7 +192,7 @@ export function flow<
   f11: UnaryFunction<T11, T12>,
   f12: UnaryFunction<T12, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -213,7 +224,7 @@ export function flow<
   f12: UnaryFunction<T12, T13>,
   f13: UnaryFunction<T13, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -247,7 +258,7 @@ export function flow<
   f13: UnaryFunction<T13, T14>,
   f14: UnaryFunction<T14, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -283,7 +294,7 @@ export function flow<
   f14: UnaryFunction<T14, T15>,
   f15: UnaryFunction<T15, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -321,7 +332,7 @@ export function flow<
   f15: UnaryFunction<T15, T16>,
   f16: UnaryFunction<T16, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -361,7 +372,7 @@ export function flow<
   f16: UnaryFunction<T16, T17>,
   f17: UnaryFunction<T17, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -403,7 +414,7 @@ export function flow<
   f17: UnaryFunction<T17, T18>,
   f18: UnaryFunction<T18, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -447,7 +458,7 @@ export function flow<
   f18: UnaryFunction<T18, T19>,
   f19: UnaryFunction<T19, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -493,7 +504,7 @@ export function flow<
   f19: UnaryFunction<T19, T20>,
   f20: UnaryFunction<T20, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -541,7 +552,7 @@ export function flow<
   f20: UnaryFunction<T20, T21>,
   f21: UnaryFunction<T21, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -591,7 +602,7 @@ export function flow<
   f21: UnaryFunction<T21, T22>,
   f22: UnaryFunction<T22, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -643,7 +654,7 @@ export function flow<
   f22: UnaryFunction<T22, T23>,
   f23: UnaryFunction<T23, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -697,7 +708,7 @@ export function flow<
   f23: UnaryFunction<T23, T24>,
   f24: UnaryFunction<T24, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -753,7 +764,7 @@ export function flow<
   f24: UnaryFunction<T24, T25>,
   f25: UnaryFunction<T25, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -811,7 +822,7 @@ export function flow<
   f25: UnaryFunction<T25, T26>,
   f26: UnaryFunction<T26, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -871,7 +882,7 @@ export function flow<
   f26: UnaryFunction<T26, T27>,
   f27: UnaryFunction<T27, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -933,7 +944,7 @@ export function flow<
   f27: UnaryFunction<T27, T28>,
   f28: UnaryFunction<T28, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -997,7 +1008,7 @@ export function flow<
   f28: UnaryFunction<T28, T29>,
   f29: UnaryFunction<T29, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1063,7 +1074,7 @@ export function flow<
   f29: UnaryFunction<T29, T30>,
   f30: UnaryFunction<T30, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1131,7 +1142,7 @@ export function flow<
   f30: UnaryFunction<T30, T31>,
   f31: UnaryFunction<T31, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1201,7 +1212,7 @@ export function flow<
   f31: UnaryFunction<T31, T32>,
   f32: UnaryFunction<T32, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1273,7 +1284,7 @@ export function flow<
   f32: UnaryFunction<T32, T33>,
   f33: UnaryFunction<T33, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1347,7 +1358,7 @@ export function flow<
   f33: UnaryFunction<T33, T34>,
   f34: UnaryFunction<T34, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1423,7 +1434,7 @@ export function flow<
   f34: UnaryFunction<T34, T35>,
   f35: UnaryFunction<T35, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1501,7 +1512,7 @@ export function flow<
   f35: UnaryFunction<T35, T36>,
   f36: UnaryFunction<T36, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1581,7 +1592,7 @@ export function flow<
   f36: UnaryFunction<T36, T37>,
   f37: UnaryFunction<T37, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1663,7 +1674,7 @@ export function flow<
   f37: UnaryFunction<T37, T38>,
   f38: UnaryFunction<T38, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1747,7 +1758,7 @@ export function flow<
   f38: UnaryFunction<T38, T39>,
   f39: UnaryFunction<T39, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1833,7 +1844,7 @@ export function flow<
   f39: UnaryFunction<T39, T40>,
   f40: UnaryFunction<T40, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -1921,7 +1932,7 @@ export function flow<
   f40: UnaryFunction<T40, T41>,
   f41: UnaryFunction<T41, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2011,7 +2022,7 @@ export function flow<
   f41: UnaryFunction<T41, T42>,
   f42: UnaryFunction<T42, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2103,7 +2114,7 @@ export function flow<
   f42: UnaryFunction<T42, T43>,
   f43: UnaryFunction<T43, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2197,7 +2208,7 @@ export function flow<
   f43: UnaryFunction<T43, T44>,
   f44: UnaryFunction<T44, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2293,7 +2304,7 @@ export function flow<
   f44: UnaryFunction<T44, T45>,
   f45: UnaryFunction<T45, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2391,7 +2402,7 @@ export function flow<
   f45: UnaryFunction<T45, T46>,
   f46: UnaryFunction<T46, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2491,7 +2502,7 @@ export function flow<
   f46: UnaryFunction<T46, T47>,
   f47: UnaryFunction<T47, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2593,7 +2604,7 @@ export function flow<
   f47: UnaryFunction<T47, T48>,
   f48: UnaryFunction<T48, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2697,7 +2708,7 @@ export function flow<
   f48: UnaryFunction<T48, T49>,
   f49: UnaryFunction<T49, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2803,7 +2814,7 @@ export function flow<
   f49: UnaryFunction<T49, T50>,
   f50: UnaryFunction<T50, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -2911,7 +2922,7 @@ export function flow<
   f50: UnaryFunction<T50, T51>,
   f51: UnaryFunction<T51, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3021,7 +3032,7 @@ export function flow<
   f51: UnaryFunction<T51, T52>,
   f52: UnaryFunction<T52, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3133,7 +3144,7 @@ export function flow<
   f52: UnaryFunction<T52, T53>,
   f53: UnaryFunction<T53, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3247,7 +3258,7 @@ export function flow<
   f53: UnaryFunction<T53, T54>,
   f54: UnaryFunction<T54, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3363,7 +3374,7 @@ export function flow<
   f54: UnaryFunction<T54, T55>,
   f55: UnaryFunction<T55, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3481,7 +3492,7 @@ export function flow<
   f55: UnaryFunction<T55, T56>,
   f56: UnaryFunction<T56, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3601,7 +3612,7 @@ export function flow<
   f56: UnaryFunction<T56, T57>,
   f57: UnaryFunction<T57, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3723,7 +3734,7 @@ export function flow<
   f57: UnaryFunction<T57, T58>,
   f58: UnaryFunction<T58, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3847,7 +3858,7 @@ export function flow<
   f58: UnaryFunction<T58, T59>,
   f59: UnaryFunction<T59, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -3973,7 +3984,7 @@ export function flow<
   f59: UnaryFunction<T59, T60>,
   f60: UnaryFunction<T60, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -4101,7 +4112,7 @@ export function flow<
   f60: UnaryFunction<T60, T61>,
   f61: UnaryFunction<T61, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -4231,7 +4242,7 @@ export function flow<
   f61: UnaryFunction<T61, T62>,
   f62: UnaryFunction<T62, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   T1,
   T2,
@@ -4363,7 +4374,7 @@ export function flow<
   f62: UnaryFunction<T62, T63>,
   f63: UnaryFunction<T63, TOut>,
 ): AnyFunc<TIn, TOut>
-export function flow<
+export function compose<
   TIn extends any[],
   F1 extends AnyFunc<TIn>,
   Fns extends UnaryFunction[],
@@ -4371,7 +4382,7 @@ export function flow<
   f1: F1,
   ...fns: FlowFns<Fns> extends Fns ? Fns : FlowFns<Fns>
 ): AnyFunc<TIn, ReturnType<Last<Fns>>>
-export function flow<
+export function compose<
   TIn extends any[],
   F1 extends AnyFunc<TIn>,
   Fns extends UnaryFunction[],
@@ -4383,101 +4394,112 @@ export function flow<
 }
 
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
+  const { describe, it, expect, expectTypeOf } = import.meta.vitest
 
-  it('should combine functions in sequence', () => {
-    const fn = flow(
-      (s: string) => s.length,
-      (n) => n * 2,
-      (n) => n.toString(),
-    )
-    expect(fn('hello')).toBe('10')
-  })
+  describe('Function compose', () => {
+    it('should compose functions in sequence', () => {
+      const fn = compose(
+        (s: string) => s.length,
+        (n) => n * 2,
+        (n) => n.toString(),
+      )
+      expect(fn('hello')).toEqual('10')
+    })
+    it('should compose function return type', () => {
+      const fn = compose(
+        () => 'hello' as const,
+        (v) => v.toUpperCase() as Uppercase<typeof v>,
+        (v) => `${v} world` as const,
+      )
+      expectTypeOf(fn()).toEqualTypeOf<'HELLO world'>()
+      expect(fn()).toEqual('HELLO world')
+    })
 
-  it('should still work with 80 functions in sequence', () => {
-    const f = (n: number) => n + 1
-    const fn = flow(
-      (s: string) => s.length,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      f,
-      (n) => n.toString(),
-    )
-    expect(fn('a')).toBe('79')
+    it('should still work with 80 functions in sequence', () => {
+      const add1 = (n: number) => n + 1
+      const fn = compose(
+        (s: string) => s.length,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+        add1,
+      )
+      expect(fn('a')).toEqual(80)
+    })
   })
 }

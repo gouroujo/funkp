@@ -1,32 +1,22 @@
 import { type Effect } from 'src/Effect'
-import { fail, Operation, pure } from 'src/RuntimeOp'
+import * as O from 'src/RuntimeOp'
+import { effectable } from '../internal/effectable'
 
-export const map = <S1, S2>(
+export const map = <S1, S2, F, C>(
   fn: (value: S1) => S2,
-): (<F, C>(
+): ((
   effect: Effect<S1, F, C>,
-) => Effect<S1 extends never ? never : S2, F, C>) => {
-  return (effect) => ({
-    *[Symbol.iterator]() {
-      return yield pure(fn(yield* effect))
-    },
-  })
+) => Effect<S1 extends never ? never : Awaited<S2>, F, C>) => {
+  return (effect) => effectable([...effect.ops, O.onSuccess(fn)])
 }
+export const mapSuccess = map
 
 export const mapError = <F1, F2>(
   fn: (value: F1) => F2,
 ): (<S, C>(
   effect: Effect<S, F1, C>,
 ) => Effect<S, F1 extends never ? never : F2, C>) => {
-  return (effect) => ({
-    *[Symbol.iterator]() {
-      try {
-        return yield pure(yield* effect) as Operation<any>
-      } catch (failure) {
-        throw yield fail(fn(failure as F1)) as Operation<F2>
-      }
-    },
-  })
+  return (effect) => effectable([...effect.ops, O.onFailure(fn)])
 }
 
 if (import.meta.vitest) {
@@ -47,6 +37,27 @@ if (import.meta.vitest) {
       await expect(Effect.runPromise(effect)).resolves.toEqual(
         (123 + 1) * 2 - 3,
       )
+    })
+    it('should map async values', async () => {
+      const effect = pipe(
+        Effect.succeed(123),
+        Effect.map(async (v) => v + 1),
+        Effect.map((v) => Promise.resolve(v * 2)),
+        Effect.map((v) => v - 3),
+      )
+      expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
+      await expect(Effect.runPromise(effect)).resolves.toEqual(
+        (123 + 1) * 2 - 3,
+      )
+    })
+    it('should map types', async () => {
+      const effect = pipe(
+        Effect.succeed('abc' as const),
+        Effect.map((v) => v.toUpperCase() as Uppercase<typeof v>),
+        Effect.map((v) => `${v}!` as const),
+      )
+      expectTypeOf(effect).toEqualTypeOf<Effect<'ABC!', never, never>>()
+      await expect(Effect.runPromise(effect)).resolves.toEqual('ABC!')
     })
     it('should not map failures', async () => {
       const effect = pipe(
@@ -86,6 +97,15 @@ if (import.meta.vitest) {
       )
       expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
       await expect(Effect.runPromise(effect)).resolves.toEqual(123 + 100)
+    })
+    it('should map failure types', async () => {
+      const effect = pipe(
+        Effect.fail('abc' as const),
+        Effect.mapError((v) => v.toUpperCase() as Uppercase<typeof v>),
+        Effect.mapError((v) => `${v}!` as const),
+      )
+      expectTypeOf(effect).toEqualTypeOf<Effect<never, 'ABC!', never>>()
+      await expect(Effect.runPromise(effect)).rejects.toEqual('ABC!')
     })
   })
 }

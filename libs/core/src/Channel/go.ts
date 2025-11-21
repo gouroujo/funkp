@@ -1,69 +1,141 @@
-import * as Context from '../Context'
-import { absurd } from '../functions'
+import { absurd } from 'src/functions'
+import * as O from 'src/Option'
+import type { Channel } from './chan'
 import { close } from './close'
-import { put } from './operations'
-import type { Channel, Instruction } from './types'
+import { type Instruction, put } from './instructions'
 
-export const go = <T>(
-  generator: Iterator<Instruction<T> | Context.Requirement, T, any>,
-  channel: Channel<T>,
-  context: Context.Context = {},
+export const go = <T, A extends unknown[] = never[]>(
+  genFn: (...args: A) => Generator<Instruction<T>, void, T>,
+  args: A,
 ) => {
-  ;(function go_(
-    state: IteratorResult<Instruction<T> | Context.Requirement, T>,
-  ) {
-    if (!state.done && !channel.closed) {
-      const instruction = state.value
-      switch (instruction._tag) {
-        case 'take': {
-          const value = channel.buffer.take()
-          if (value !== null) {
-            setImmediate(() => go_(generator.next(value)))
-          } else {
-            channel.takers.push((value) => {
-              go_(generator.next(value))
-            })
-          }
-          break
+  const gen = genFn(...args)
+  go_(gen, gen.next())
+}
+
+const go_ = <T>(
+  generator: Generator<Instruction<T>, void, T>,
+  step: IteratorResult<Instruction<T>, void>,
+) => {
+  if (step.done === false) {
+    const instruction = step.value
+    switch (instruction._tag) {
+      case 'take': {
+        const { channel } = instruction
+        const value = channel.buffer.take()
+        if (O.isSome(value)) {
+          setImmediate(() => go_(generator, generator.next(value.value)))
+        } else {
+          channel.takers.push((v) => {
+            go_(generator, generator.next(v))
+          })
         }
-        case 'put': {
-          const value = instruction.value
-          if (value instanceof Promise) {
-            value.then((resolved) => go_({ done: false, value: put(resolved) }))
-            break
-          }
-          const firstTaker = channel.takers.shift()
-          if (firstTaker) {
-            setImmediate(() => firstTaker(value))
-          } else if (channel.buffer.put(value)) {
-            go_(generator.next(value))
-          } else {
-            setImmediate(() => go_(state))
-          }
-          break
-        }
-        case 'requirement': {
-          if (context.services?.has(instruction.id)) {
-            go_(generator.next(context.services.get(instruction.id)))
-          } else {
-            throw new Error(
-              `Requirement ${instruction.id} has not been found in the current context.`,
-            )
-          }
-          break
-        }
-        case 'sleep': {
-          setTimeout(() => {
-            go_(generator.next(null))
-          }, instruction.ms)
-          break
-        }
-        default: {
-          absurd(instruction)
-        }
+        break
       }
-    } else if (state.done) {
-      close(channel, state.value)
+      case 'put': {
+        const { channel, value } = instruction
+        if (value instanceof Promise) {
+          value.then((resolved) =>
+            go_(generator, { done: false, value: put(channel, resolved) }),
+          )
+          break
+        }
+        const firstTaker = channel.takers.shift()
+        if (firstTaker) {
+          setImmediate(() => firstTaker(value))
+          go_(generator, generator.next(value))
+        } else if (channel.buffer.put(value)) {
+          go_(generator, generator.next(value))
+        } else {
+          setImmediate(() => go_(generator, step))
+        }
+        break
+      }
+      case 'sleep': {
+        const { ms } = instruction
+        setTimeout(() => {
+          go_(generator, generator.next())
+        }, ms)
+        break
+      }
+      default: {
+        absurd(instruction)
+      }
     }
-  })(generator.next())
+  }
+}
+
+if (import.meta.vitest) {
+  const { it, describe, expect, vi } = import.meta.vitest
+  const { put, take, sleep } = await import('./instructions')
+  const { chan } = await import('./chan')
+  const { wait } = await import('./wait')
+
+  describe('Channel.go : Ping/Pong CSP', () => {
+    type Ball = {
+      hits: number
+    }
+    const player = function* (
+      table: Channel<Ball>,
+      name: string,
+      spy: (...args: any[]) => void,
+    ): Generator<Instruction<Ball>, void, Ball> {
+      while (true) {
+        const ball = yield take(table)
+        if (ball === null) {
+          break
+        }
+        ball.hits += 1
+        spy(name, ball.hits)
+        yield put(table, ball)
+      }
+    }
+    it('should work if we put the table before the players', async () => {
+      const table = chan<Ball>(1)
+      const spy = vi.fn()
+      go(function* (): Generator<Instruction<Ball>, void, Ball> {
+        yield put(table, { hits: 0 })
+        go(player, [table, 'ping', spy])
+        go(player, [table, 'pong', spy])
+        yield sleep(table, 10)
+        const ball = yield take(table)
+        if (ball) {
+          close(table, ball)
+        }
+      }, [])
+
+      const result = await wait(table)
+      expect(result.hits).toBeGreaterThan(10)
+      spy.mock.calls.forEach((call, index) => {
+        if (index % 2 === 0) {
+          expect(call).toEqual(['ping', index + 1])
+        } else {
+          expect(call).toEqual(['pong', index + 1])
+        }
+      })
+    })
+    it('should work if we put the table after the players', async () => {
+      const table = chan<Ball>(1)
+      const spy = vi.fn()
+      go(function* (): Generator<Instruction<Ball>, void, Ball> {
+        go(player, [table, 'ping', spy])
+        go(player, [table, 'pong', spy])
+        yield put(table, { hits: 0 })
+        yield sleep(table, 10)
+        const ball = yield take(table)
+        if (ball) {
+          close(table, ball)
+        }
+      }, [])
+
+      const result = await wait(table)
+      expect(result.hits).toBeGreaterThan(10)
+      spy.mock.calls.forEach((call, index) => {
+        if (index % 2 === 0) {
+          expect(call).toEqual(['ping', index + 1])
+        } else {
+          expect(call).toEqual(['pong', index + 1])
+        }
+      })
+    })
+  })
 }

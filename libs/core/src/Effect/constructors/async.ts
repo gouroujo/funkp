@@ -1,29 +1,18 @@
 import * as Op from '../../RuntimeOp'
-import type { Effect } from '../types'
+import type { Effect } from '../effect'
+import { effectable } from '../internal/effectable'
 
 export const promise = <Success>(
   promiseFn: () => Promise<Success>,
 ): Effect<Success, never, never> => {
-  return {
-    *[Symbol.iterator]() {
-      return yield Op.promise(promiseFn())
-    },
-  }
+  return effectable([Op.promise(promiseFn)])
 }
 
 export const tryCatch = <Success, Failure>(
   promiseFn: () => Promise<Success>,
   catchFn: (error: unknown) => Failure,
 ): Effect<Success, Failure, never> => {
-  return {
-    *[Symbol.iterator]() {
-      try {
-        return yield Op.promise(promiseFn())
-      } catch (error: unknown) {
-        throw yield Op.fail(catchFn(error))
-      }
-    },
-  }
+  return effectable([Op.promise(promiseFn, catchFn)])
 }
 
 if (import.meta.vitest) {
@@ -38,7 +27,7 @@ if (import.meta.vitest) {
     })
 
     it('should throw on failure', async () => {
-      const effect = promise(() => Promise.reject('async error' as const))
+      const effect = promise(() => Promise.reject('async error'))
       await expect(runPromise(effect)).rejects.toEqual('async error')
     })
   })
@@ -47,11 +36,11 @@ if (import.meta.vitest) {
     const runPromise = (await import('../run')).runPromise
     it('should handle async failure', async () => {
       const effect = tryCatch(
-        () => Promise.reject('async error'),
+        () => Promise.reject('FAILURE'),
         (error) => 'error: ' + error,
       )
       expectTypeOf(effect).toEqualTypeOf<Effect<never, string, never>>()
-      await expect(runPromise(effect)).rejects.toEqual('error: async error')
+      await expect(runPromise(effect)).rejects.toEqual('error: FAILURE')
     })
   })
 }

@@ -1,12 +1,9 @@
-import * as Op from '../../RuntimeOp'
-import type { Effect } from '../types'
+import * as O from '../../RuntimeOp'
+import type { Effect } from '../effect'
+import { effectable } from '../internal/effectable'
 
 export const sleep = (ms: number): Effect<void, never, never> => {
-  return {
-    *[Symbol.iterator]() {
-      return yield Op.sleep(ms)
-    },
-  }
+  return effectable([O.sleep(ms)])
 }
 
 if (import.meta.vitest) {
@@ -15,13 +12,12 @@ if (import.meta.vitest) {
     const runPromise = (await import('../run')).runPromise
 
     it('should return an Effect<void, never, never>', () => {
-      const effect = sleep(10)
-      expectTypeOf(effect).toEqualTypeOf<Effect<void, never, never>>()
+      expectTypeOf(sleep(10)).toEqualTypeOf<Effect<void, never, never>>()
     })
 
     it('should resolve after the specified delay', async () => {
       const start = Date.now()
-      await runPromise(sleep(50))
+      await expect(runPromise(sleep(50))).resolves.toBeUndefined()
       const elapsed = Date.now() - start
       expect(elapsed).toBeGreaterThanOrEqual(50)
     })

@@ -1,11 +1,8 @@
-import type { Operation } from './_op'
-
 export const PURE_OP = '@funkp/core/operator/pure' as const
-export const pure = <T>(value: T) =>
-  ({
-    _op: PURE_OP,
-    value,
-  }) satisfies Operation<T>
+export const pure = <T>(value: T) => ({
+  _op: PURE_OP,
+  value,
+})
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest

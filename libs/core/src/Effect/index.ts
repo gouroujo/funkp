@@ -4,4 +4,4 @@ export * from './interrupt'
 export * from './operators'
 export * from './run'
 
-export * from './types'
+export * from './effect'

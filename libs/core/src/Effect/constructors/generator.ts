@@ -1,14 +1,18 @@
-import type { FilterRequirement, ServiceType } from '../../Context'
-import type { Operation } from '../../RuntimeOp'
-import type { Effect } from '../types'
+import type { Effect } from '../effect'
+import { YieldWrap } from '../yield'
+
+type ExtractFailure<T> = [T] extends [never]
+  ? never
+  : [T] extends [YieldWrap<Effect<any, infer U, any>>]
+    ? U
+    : never
 
 export function gen<
+  YieldingValues extends YieldWrap<Effect<any, any, any>>,
   Success,
-  Failure = never,
-  YieldingValues extends ServiceType | Operation = never,
 >(
-  genFn: () => Generator<YieldingValues, Success, unknown>,
-): Effect<Success, Failure, FilterRequirement<YieldingValues>> {
+  genFn: () => Generator<YieldingValues, Success, any>,
+): Effect<Success, ExtractFailure<YieldingValues>, never> {
   return {
     *[Symbol.iterator]() {
       return yield* genFn()
@@ -26,7 +30,6 @@ if (import.meta.vitest) {
     const effect1 = Effect.succeed('effect1' as const)
     const effect2 = Effect.succeed('effect2' as const)
     const failure = Effect.fail('fail' as const)
-
     it('should combine effect', async () => {
       const combined = pipe(
         gen(function* () {
@@ -42,20 +45,37 @@ if (import.meta.vitest) {
       const result = await Effect.runPromise(combined)
       expect(result).toEqual('Combined: effect1, effect2')
     })
-    it('should combine effect that fail', async () => {
+    it('should gen with a failure', async () => {
+      const effect = gen(function* () {
+        throw yield* Effect.fail('fail' as const)
+      })
+      expectTypeOf(effect).toEqualTypeOf<Effect<never, 'fail', never>>()
+      await expect(Effect.runPromise(effect)).rejects.toEqual('fail')
+    })
+    it('should gen effect that could fail', async () => {
       const spy = vi.fn()
-      const combined = pipe(
-        gen(function* () {
-          const a = yield* failure
-          spy(a)
-          const b = yield* effect2
-          return [a, b] as const
-        }),
-        Effect.map(([a, b]) => `Combined: ${a}, ${b}` as const),
-      )
-      expectTypeOf(combined).toEqualTypeOf<Effect<never, 'fail', never>>()
-      await expect(Effect.runPromise(combined)).rejects.toEqual('fail')
+      const effect = gen(function* () {
+        const a = yield* failure
+        spy(a)
+        const b = yield* effect2
+        return b
+      })
+      expectTypeOf(effect).toEqualTypeOf<Effect<'effect2', 'fail', never>>()
+      await expect(Effect.runPromise(effect)).rejects.toEqual('fail')
       expect(spy).not.toHaveBeenCalled()
+    })
+    it('should handle failure', async () => {
+      const effect = gen(function* () {
+        // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+        const valid: boolean = true
+        const a = yield* effect1
+        if (valid) {
+          throw yield* failure
+        }
+        return a
+      })
+      expectTypeOf(effect).toEqualTypeOf<Effect<'effect1', 'fail', never>>()
+      await expect(Effect.runPromise(effect)).rejects.toEqual('fail')
     })
 
     it('should combine with async effect', async () => {

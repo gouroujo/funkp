@@ -1,5 +1,6 @@
-import type { Channel } from './types'
+import { isEmpty as isEmptyBuffer } from './buffer'
+import type { Channel } from './chan'
 
 export function isEmpty<T>(channel: Channel<T>): boolean {
-  return channel.buffer.length === 0
+  return isEmptyBuffer(channel.buffer)
 }

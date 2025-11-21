@@ -1,4 +1,4 @@
-import type { Channel } from './types'
+import type { Channel } from './chan'
 
 export const wait = <T>(channel: Channel<T>) => {
   return new Promise<T>((resolve, reject) => {

@@ -1,7 +1,7 @@
 import * as RuntimeFiber from '../../RuntimeFiber'
 import * as Op from '../../RuntimeOp'
 
-import type { Effect } from '../types'
+import type { Effect } from '../effect'
 
 export const fork = <Success, Failure>(
   effect: Effect<Success, Failure, never>,

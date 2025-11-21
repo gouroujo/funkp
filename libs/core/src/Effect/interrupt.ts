@@ -1,5 +1,5 @@
 import * as Op from '../RuntimeOp'
-import type { Effect } from './types'
+import type { Effect } from './effect'
 
 export function interrupt(): Effect<never, never, never> {
   return {

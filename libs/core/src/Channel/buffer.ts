@@ -1,13 +1,15 @@
-import { absurd } from '../functions'
+import { absurd } from 'src/functions'
+import * as O from 'src/Option'
 
 export type BufferStrategy = 'fixed' | 'dropping' | 'sliding'
 
 export type Buffer<T> = {
   _buffer: T[]
   put: (el: T) => boolean
-  take: () => T | null
+  take: () => O.Option<T>
   size: () => number
 }
+export const isEmpty = <T>(buf: Buffer<T>): boolean => buf.size() === 0
 
 export const MAX_BUFFER_SIZE = 1024
 
@@ -42,8 +44,9 @@ export const droppingBuffer = <T>(size: number): Buffer<T> => ({
     this._buffer.push(element)
     return true
   },
-  take(): T | null {
-    return this._buffer.shift() ?? null
+  take(): O.Option<T> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this._buffer.length === 0 ? O.none() : O.some(this._buffer.shift()!)
   },
   size(): number {
     return this._buffer.length
@@ -56,8 +59,9 @@ export const fixedBuffer = <T>(size: number): Buffer<T> => ({
     this._buffer.push(element)
     return true
   },
-  take(): T | null {
-    return this._buffer.shift() ?? null
+  take(): O.Option<T> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this._buffer.length === 0 ? O.none() : O.some(this._buffer.shift()!)
   },
   size(): number {
     return this._buffer.length
@@ -70,8 +74,9 @@ export const slidingBuffer = <T>(size: number): Buffer<T> => ({
     if (length > size) this._buffer.shift()
     return true
   },
-  take(): T | null {
-    return this._buffer.shift() ?? null
+  take(): O.Option<T> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this._buffer.length === 0 ? O.none() : O.some(this._buffer.shift()!)
   },
   size(): number {
     return this._buffer.length

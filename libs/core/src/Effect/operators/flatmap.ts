@@ -1,15 +1,13 @@
 import type { Effect } from 'src/Effect'
+import * as O from 'src/RuntimeOp'
+import { effectable } from '../internal/effectable'
 
 export const flatmap = <S1, S2, F2, C2>(
   fn: (value: S1) => Effect<S2, F2, C2>,
 ): (<F1, C1, C2>(
   effect: Effect<S1, F1, C1>,
 ) => Effect<S1 extends never ? never : S2, F1 | F2, C1 | C2>) => {
-  return (effect) => ({
-    *[Symbol.iterator]() {
-      return yield* fn(yield* effect) as any
-    },
-  })
+  return (effect) => effectable([...effect.ops, O.onSuccess(fn)])
 }
 export const chain = flatmap
 

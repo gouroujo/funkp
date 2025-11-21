@@ -1,5 +1,4 @@
-import { chan } from './chan'
-import type { Channel } from './types'
+import { chan, type Channel } from './chan'
 
 export type ClosedChannel<T> = Channel<T> & { closed: true }
 export function isClosed<T>(channel: Channel<T>): channel is ClosedChannel<T> {

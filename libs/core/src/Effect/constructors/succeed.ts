@@ -1,15 +1,12 @@
 import * as Op from '../../RuntimeOp'
 
-import type { Effect } from '../types'
+import type { Effect } from '../effect'
+import { effectable } from '../internal/effectable'
 
 export const succeed = <Success>(
   value: Success,
 ): Effect<Success, never, never> => {
-  return {
-    *[Symbol.iterator]() {
-      return yield Op.pure(value)
-    },
-  }
+  return effectable<Success, never, never>([Op.pure(value)])
 }
 
 export function of<Success>(value: Success) {
@@ -21,7 +18,7 @@ if (import.meta.vitest) {
   describe('Effect.succeed', async () => {
     const runPromise = (await import('../run')).runPromise
 
-    it.each([123, 0, -1, 3.14, Number.MAX_VALUE, Number.MIN_VALUE])(
+    it.each([123, 0, -1, 3.14, Number.MAX_VALUE, Number.MIN_VALUE, NaN])(
       'should succeed with the provided number : "%d"',
       async (v) => {
         const effect = succeed(v)

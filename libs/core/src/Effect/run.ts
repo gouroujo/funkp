@@ -1,6 +1,6 @@
 import * as Runtime from '../Runtime'
 import { RuntimeFiber } from '../RuntimeFiber'
-import type { Effect } from './types'
+import type { Effect } from './effect'
 
 export function runPromise<Success, Failure>(
   effect: Effect<Success, Failure, never>,

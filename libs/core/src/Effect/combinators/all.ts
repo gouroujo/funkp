@@ -10,7 +10,7 @@ import {
   type Failure,
   type Requirements,
   type Success,
-} from '../types'
+} from '../effect'
 import { concurrency, type Concurrency } from './concurrency'
 import { semaphore } from './semaphore'
 

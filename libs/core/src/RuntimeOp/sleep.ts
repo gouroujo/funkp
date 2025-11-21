@@ -1,11 +1,8 @@
-import type { Operation } from './_op'
-
 export const SLEEP_OP = '@funkp/core/operator/sleep' as const
-export const sleep = (ms: number) =>
-  ({
-    _op: SLEEP_OP,
-    value: ms,
-  }) satisfies Operation<number>
+export const sleep = (ms: number) => ({
+  _op: SLEEP_OP,
+  ms,
+})
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
@@ -15,7 +12,7 @@ if (import.meta.vitest) {
       expect(operation).toMatchInlineSnapshot(`
         {
           "_op": "@funkp/core/operator/sleep",
-          "value": 10,
+          "ms": 10,
         }
       `)
     })

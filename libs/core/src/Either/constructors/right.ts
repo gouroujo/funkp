@@ -17,10 +17,11 @@ import type { Right } from '..'
  * // r is { _tag: 'Right', right: 42 }
  * ```
  */
-export const right = <R>(rightValue: R): Right<R> => ({
-  _tag: 'Right',
-  right: rightValue,
-})
+export function right(): Right<void>
+export function right<R>(rightValue: R): Right<R>
+export function right<R>(rightValue?: R): Right<R> {
+  return { _tag: 'Right', right: rightValue as R }
+}
 
 /**
  * Alias for {@link right}. Useful for functional programming style.

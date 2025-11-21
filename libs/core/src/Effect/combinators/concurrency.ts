@@ -1,4 +1,4 @@
-import { Effect } from '../types'
+import { Effect } from '../effect'
 
 export type Concurrency = number | 'unbounded' | 'inherit' | undefined
 

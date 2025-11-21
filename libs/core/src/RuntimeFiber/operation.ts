@@ -33,7 +33,7 @@ export const handlers: OperationHandlers<[Op.Operation]> = {
   [Op.SLEEP_OP]: ({ value }, { next }) =>
     setTimeout(() => next(E.right(null)), value),
   [Op.SYNC_OP]: ({ value }, { next }) => next(value),
-  [Op.WITH_RUNTIME_OP]: (_, { next }, { fiber }) => next(fiber),
+  [Op.WITH_RUNTIME_OP]: (_, { next }, { runtime }) => next(runtime),
   [Op.YIELD_OP]: (_, { next }) => setTimeout(() => next(), 0),
   [Op.INTERRUPT_OP]: (_, { exit }, { fiber }) => {
     interrupt(fiber)
