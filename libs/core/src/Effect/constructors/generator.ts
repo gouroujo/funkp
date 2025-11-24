@@ -1,5 +1,7 @@
+import { iterate } from 'src/RuntimeOp'
 import type { Effect } from '../effect'
-import { YieldWrap } from '../yield'
+import { effectable } from '../internal/effectable'
+import { YieldWrap } from '../internal/yieldwrap'
 
 type ExtractFailure<T> = [T] extends [never]
   ? never
@@ -13,11 +15,7 @@ export function gen<
 >(
   genFn: () => Generator<YieldingValues, Success, any>,
 ): Effect<Success, ExtractFailure<YieldingValues>, never> {
-  return {
-    *[Symbol.iterator]() {
-      return yield* genFn()
-    },
-  }
+  return effectable([iterate(genFn)])
 }
 
 if (import.meta.vitest) {
@@ -35,6 +33,7 @@ if (import.meta.vitest) {
         gen(function* () {
           const a = yield* effect1
           const b = yield* effect2
+          console.log(a, b)
           return [a, b] as const
         }),
         Effect.map(([a, b]) => `Combined: ${a}, ${b}` as const),
@@ -47,7 +46,7 @@ if (import.meta.vitest) {
     })
     it('should gen with a failure', async () => {
       const effect = gen(function* () {
-        throw yield* Effect.fail('fail' as const)
+        throw yield* failure
       })
       expectTypeOf(effect).toEqualTypeOf<Effect<never, 'fail', never>>()
       await expect(Effect.runPromise(effect)).rejects.toEqual('fail')

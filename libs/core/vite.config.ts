@@ -47,6 +47,7 @@ export default defineConfig({
       reportsDirectory: '../coverage/<project-root>',
       provider: 'v8',
     },
+    testTimeout: 500,
   },
   define: {
     'import.meta.vitest': 'undefined',

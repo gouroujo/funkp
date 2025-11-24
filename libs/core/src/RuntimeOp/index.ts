@@ -1,28 +1,30 @@
 import type { Effect } from 'src/Effect/effect'
 import type { ASYNC_OP } from './async'
-import type { DELEGATE_OP } from './delegate'
 import type { FAIL_OP } from './fail'
 import type { FORK_OP } from './fork'
 import type { INJECT_OP } from './inject'
 import type { INTERRUPT_OP } from './interrupt'
+import type { ITERATE_OP } from './iterate'
 import type { ON_FAILURE_OP } from './onFailure'
 import type { ON_SUCCESS_OP } from './onSuccess'
 import type { PURE_OP } from './pure'
 import type { SLEEP_OP } from './sleep'
+import type { UNFOLD_OP } from './unfold'
 import type { WITH_RUNTIME_OP } from './withRuntime'
 import type { YIELD_OP } from './yield'
 
 export * from './async'
-export * from './delegate'
 export * from './fail'
 export * from './fork'
 export * from './inject'
 export * from './interrupt'
+export * from './iterate'
 export * from './onFailure'
 export * from './onSuccess'
 export * from './pure'
 export * from './sleep'
 export * from './sync'
+export * from './unfold'
 export * from './withRuntime'
 export * from './yield'
 
@@ -58,4 +60,5 @@ export type Operation<Success, Failure, Context> =
   // | ReturnType<typeof sync>
   | { _op: typeof WITH_RUNTIME_OP }
   | { _op: typeof YIELD_OP }
-  | { _op: typeof DELEGATE_OP; effect: Effect<Success, Failure, Context> }
+  | { _op: typeof UNFOLD_OP }
+  | { _op: typeof ITERATE_OP; fn: () => Iterator<any, any, any> }

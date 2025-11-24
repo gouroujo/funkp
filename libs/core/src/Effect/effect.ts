@@ -12,7 +12,7 @@ export type Context<T extends Effect<unknown, unknown, any>> =
   T extends Effect<unknown, unknown, infer C> ? C : never
 
 export type Effect<Success, Failure = never, Context = never> = {
-  ops: Operation<any, any, any>[]
+  ops: Operation<Success, Failure, Context>[]
   [Symbol.iterator](): Iterator<
     YieldWrap<Effect<Success, Failure, Context>>,
     Success,
