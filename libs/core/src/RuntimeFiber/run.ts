@@ -12,6 +12,14 @@ import * as Op from 'src/RuntimeOp'
 import { Runtime } from '../Runtime'
 import { RuntimeFiber } from './types'
 
+function* effectToGenerator(ops: Op.Operation<any, any, any>[]) {
+  let result
+  for (const op of ops) {
+    result = yield op
+  }
+  return result
+}
+
 function* main<Success, Failure>(
   ops: Iterator<
     | Op.Operation<Success, Failure, any>
@@ -23,15 +31,23 @@ function* main<Success, Failure>(
   E.Either<Success, Failure>,
   E.Either<unknown, unknown>
 > {
-  let result: E.Either<unknown, unknown> = E.right()
   let current = ops.next()
+  let result: E.Either<unknown, unknown> = E.right(current.value)
   while (!current.done) {
     const op = current.value
     console.log('RUN OP', op)
     if (isYieldWrap(op)) {
       const effect = yieldWrapGet(op)
-      result = yield* main(effect.ops.values(), channel)
-      console.log('YIELDWRAP DONE', result)
+      result = yield* main(effectToGenerator(effect.ops), channel)
+      // console.log('YIELDWRAP DONE', result)
+      current = E.isRight(result)
+        ? ops.next(result.right)
+        : ops.throw
+          ? ops.throw(result.left)
+          : ops.next()
+      // if (current.done) {
+      //   return E.right(current.value)
+      // }
     } else {
       switch (op._op) {
         case Op.PURE_OP: {
@@ -45,7 +61,6 @@ function* main<Success, Failure>(
           break
         }
         case Op.ON_SUCCESS_OP: {
-          console.log('ON_SUCCESS_OP', result)
           if (E.isRight(result)) {
             yield C.take(channel)
             const value = op.fn(result.right)
@@ -101,20 +116,14 @@ function* main<Success, Failure>(
         }
         case Op.ITERATE_OP: {
           result = yield* main(op.fn(), channel)
-          console.log('ITERATE DONE', result)
           break
         }
         default:
           absurd(op)
       }
-    }
-    current = ops.next(result)
-    console.log('NEXT OP', current)
-    if (current.done) {
-      return current.value
+      current = ops.next(result)
     }
   }
-  console.log('EFFECT DONE', result)
   return result as E.Either<Success, Failure>
 }
 
@@ -125,7 +134,10 @@ export const runLoop = <Success, Failure, Context>(
   C.go(
     function* (fiber: RuntimeFiber<Success, Failure>) {
       yield C.put(fiber.channel, E.right())
-      const result = yield* main(fiber.effect[Symbol.iterator](), fiber.channel)
+      const result = yield* main(
+        effectToGenerator(fiber.effect.ops),
+        fiber.channel,
+      )
       C.close(fiber.channel, result)
     },
     [fiber],

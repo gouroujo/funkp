@@ -28,21 +28,37 @@ if (import.meta.vitest) {
     const effect1 = Effect.succeed('effect1' as const)
     const effect2 = Effect.succeed('effect2' as const)
     const failure = Effect.fail('fail' as const)
+    it('should return an effect', async () => {
+      // eslint-disable-next-line require-yield
+      const combined = gen(function* () {
+        return 'hello' as const
+      })
+      expectTypeOf(combined).toEqualTypeOf<Effect<'hello', never, never>>()
+      await expect(Effect.runPromise(combined)).resolves.toEqual('hello')
+    })
+    it('should resolve a other effect and return', async () => {
+      const combined = gen(function* () {
+        const a = yield* effect1
+        return a
+      })
+      expectTypeOf(combined).toEqualTypeOf<Effect<'effect1', never, never>>()
+      await expect(Effect.runPromise(combined)).resolves.toEqual('effect1')
+    })
     it('should combine effect', async () => {
-      const combined = pipe(
-        gen(function* () {
-          const a = yield* effect1
-          const b = yield* effect2
-          console.log(a, b)
-          return [a, b] as const
-        }),
-        Effect.map(([a, b]) => `Combined: ${a}, ${b}` as const),
-      )
+      const combined = gen(function* () {
+        const a = yield* effect1
+        const b = yield* effect2
+        console.log(a, b)
+        return [a, b] as const
+      })
+
       expectTypeOf(combined).toEqualTypeOf<
-        Effect<'Combined: effect1, effect2', never, never>
+        Effect<readonly ['effect1', 'effect2'], never, never>
       >()
-      const result = await Effect.runPromise(combined)
-      expect(result).toEqual('Combined: effect1, effect2')
+      await expect(Effect.runPromise(combined)).resolves.toEqual([
+        'effect1',
+        'effect2',
+      ])
     })
     it('should gen with a failure', async () => {
       const effect = gen(function* () {
