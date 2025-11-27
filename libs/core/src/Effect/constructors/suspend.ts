@@ -1,13 +1,10 @@
 import type { Effect } from '../effect'
+import { effectable } from '../internal/effectable'
 
 export const suspend = <Succcess, Failure, Requirements>(
   fn: () => Effect<Succcess, Failure, Requirements>,
 ): Effect<Succcess, Failure, Requirements> => {
-  return {
-    *[Symbol.iterator]() {
-      return yield* fn()
-    },
-  }
+  return effectable([...fn().ops])
 }
 
 if (import.meta.vitest) {
@@ -25,10 +22,10 @@ if (import.meta.vitest) {
     it('should unify return type', () => {
       const effect = (a: number, b: number) =>
         suspend(() =>
-          b === 0 ? fail('Cannot divide by zero') : succeed(a / b),
+          b === 0 ? fail('Cannot divide by zero' as const) : succeed(a / b),
         )
       expectTypeOf(effect).returns.toEqualTypeOf<
-        Effect<number, string, never>
+        Effect<number, 'Cannot divide by zero', never>
       >()
     })
 

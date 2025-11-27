@@ -1,8 +1,10 @@
 export const ITERATE_OP = '@funkp/core/operator/iterate' as const
-export const iterate = <T>(fn: () => Iterator<any, any, any>) => ({
-  _op: ITERATE_OP,
-  fn,
-})
+export const iterate =
+  <T>(fn: () => Generator<any, any, any>) =>
+  () => ({
+    _op: ITERATE_OP,
+    fn,
+  })
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
@@ -11,7 +13,12 @@ if (import.meta.vitest) {
       const operation = iterate(function* () {
         yield 1
       })
-      expect(operation).toMatchInlineSnapshot()
+      expect(operation()).toMatchInlineSnapshot(`
+        {
+          "_op": "@funkp/core/operator/iterate",
+          "fn": [Function],
+        }
+      `)
     })
   })
 }

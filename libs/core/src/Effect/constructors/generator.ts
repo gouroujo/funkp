@@ -23,32 +23,53 @@ if (import.meta.vitest) {
 
   describe('Effect.gen', async () => {
     const Effect = await import('../')
-    const { pipe } = await import('../../functions')
 
-    const effect1 = Effect.succeed('effect1' as const)
-    const effect2 = Effect.succeed('effect2' as const)
-    const failure = Effect.fail('fail' as const)
-    it('should return an effect', async () => {
+    it.each([
+      'hello' as const,
+      null,
+      undefined,
+      false,
+      true,
+      0,
+      -1,
+      { foo: 'bar' },
+      [1, 2, 3],
+    ])('should return an effect with value %s', async (t) => {
       // eslint-disable-next-line require-yield
       const combined = gen(function* () {
-        return 'hello' as const
+        return t
       })
-      expectTypeOf(combined).toEqualTypeOf<Effect<'hello', never, never>>()
-      await expect(Effect.runPromise(combined)).resolves.toEqual('hello')
+      expectTypeOf(combined).toEqualTypeOf<Effect<typeof t, never, never>>()
+      await expect(Effect.runPromise(combined)).resolves.toEqual(t)
     })
-    it('should resolve a other effect and return', async () => {
+    it.each([
+      'hello' as const,
+      null,
+      undefined,
+      false,
+      true,
+      0,
+      -1,
+      { foo: 'bar' },
+      [1, 2, 3],
+    ])('should resolve an other effect and return', async (t) => {
+      const spy = vi.fn()
+      const subEffect = Effect.succeed(t)
       const combined = gen(function* () {
-        const a = yield* effect1
+        const a = yield* subEffect
+        spy(a)
         return a
       })
-      expectTypeOf(combined).toEqualTypeOf<Effect<'effect1', never, never>>()
-      await expect(Effect.runPromise(combined)).resolves.toEqual('effect1')
+      expectTypeOf(combined).toEqualTypeOf<Effect<typeof t, never, never>>()
+      await expect(Effect.runPromise(combined)).resolves.toEqual(t)
+      expect(spy).toHaveBeenCalledWith(t)
     })
-    it('should combine effect', async () => {
+    it('should combine two effects together', async () => {
+      const effect1 = Effect.succeed('effect1' as const)
+      const effect2 = Effect.succeed('effect2' as const)
       const combined = gen(function* () {
         const a = yield* effect1
         const b = yield* effect2
-        console.log(a, b)
         return [a, b] as const
       })
 
@@ -60,14 +81,17 @@ if (import.meta.vitest) {
         'effect2',
       ])
     })
-    it('should gen with a failure', async () => {
+    it('should return an effect with a failure', async () => {
+      const failure = Effect.fail('fail' as const)
       const effect = gen(function* () {
         throw yield* failure
       })
       expectTypeOf(effect).toEqualTypeOf<Effect<never, 'fail', never>>()
       await expect(Effect.runPromise(effect)).rejects.toEqual('fail')
     })
-    it('should gen effect that could fail', async () => {
+    it('should stop the execution of an effect that failed', async () => {
+      const effect2 = Effect.succeed('effect2' as const)
+      const failure = Effect.fail('fail' as const)
       const spy = vi.fn()
       const effect = gen(function* () {
         const a = yield* failure
@@ -79,7 +103,9 @@ if (import.meta.vitest) {
       await expect(Effect.runPromise(effect)).rejects.toEqual('fail')
       expect(spy).not.toHaveBeenCalled()
     })
-    it('should handle failure', async () => {
+    it('should return an effect with a potential failure', async () => {
+      const effect1 = Effect.succeed('effect1' as const)
+      const failure = Effect.fail('fail' as const)
       const effect = gen(function* () {
         // eslint-disable-next-line @typescript-eslint/no-inferrable-types
         const valid: boolean = true
@@ -93,19 +119,19 @@ if (import.meta.vitest) {
       await expect(Effect.runPromise(effect)).rejects.toEqual('fail')
     })
 
-    it('should combine with async effect', async () => {
+    it('should combine a sync effect with an async effect', async () => {
       const { promise } = await import('./async')
+      const effect1 = Effect.succeed('effect1' as const)
       const asyncEffect = promise(() => Promise.resolve('async part' as const))
-      const effect = pipe(
-        gen(function* () {
-          const syncResult = yield* effect1
-          const asyncResult = yield* asyncEffect
-          return [syncResult, asyncResult] as const
-        }),
-        Effect.map(([a, b]) => `Combined: ${a}, ${b}` as const),
-      )
-      const result = await Effect.runPromise(effect)
-      expect(result).toEqual('Combined: effect1, async part')
+      const effect = gen(function* () {
+        const syncResult = yield* effect1
+        const asyncResult = yield* asyncEffect
+        return [syncResult, asyncResult] as const
+      })
+      await expect(Effect.runPromise(effect)).resolves.toEqual([
+        'effect1',
+        'async part',
+      ])
     })
   })
 }

@@ -1,7 +1,7 @@
 import type { Operation } from './_op'
 
 export const INTERRUPT_OP = '@funkp/core/operator/interrupt' as const
-export const interrupt = () =>
+export const interrupt = () => () =>
   ({
     _op: INTERRUPT_OP,
   }) satisfies Operation<void>
@@ -11,7 +11,7 @@ if (import.meta.vitest) {
   describe('Operation.Interrupt', () => {
     it('should return a with interrupt operation', () => {
       const operation = interrupt()
-      expect(operation).toMatchInlineSnapshot(`
+      expect(operation()).toMatchInlineSnapshot(`
         {
           "_op": "@funkp/core/operator/interrupt",
         }

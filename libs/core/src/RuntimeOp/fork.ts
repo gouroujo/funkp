@@ -1,8 +1,10 @@
 export const FORK_OP = '@funkp/core/operator/fork' as const
-export const fork = <T>(effect: T) => ({
-  _op: FORK_OP,
-  value: effect,
-})
+export const fork =
+  <T>(effect: T) =>
+  () => ({
+    _op: FORK_OP,
+    value: effect,
+  })
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
@@ -11,10 +13,16 @@ if (import.meta.vitest) {
     it('should return a fork operation', () => {
       const effect = succeed(42)
       const operation = fork(effect)
-      expect(operation).toMatchInlineSnapshot(`
+      expect(operation()).toMatchInlineSnapshot(`
         {
           "_op": "@funkp/core/operator/fork",
           "value": {
+            "ops": [
+              {
+                "_op": "@funkp/core/operator/pure",
+                "value": 42,
+              },
+            ],
             Symbol(Symbol.iterator): [Function],
           },
         }

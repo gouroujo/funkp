@@ -4,7 +4,7 @@ import { singleShotGen } from './singleshotgen'
 import { yieldWrap } from './yieldwrap'
 
 export const effectable = <Success, Failure, Context>(
-  ops: Operation<any, any, any>[],
+  ops: ((v?: any) => Operation<any, any, any>)[],
 ): Effect<Success, Failure, Context> => {
   return {
     ops,
