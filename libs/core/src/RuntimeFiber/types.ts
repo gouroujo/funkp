@@ -1,5 +1,4 @@
 import type { Channel } from 'src/Channel'
-import type { Either } from 'src/Either'
 import type { Brand } from '../Brand'
 import type { Effect } from '../Effect'
 import type { Exit } from '../Exit'
@@ -17,7 +16,7 @@ export interface RuntimeFiber<Success, Failure> {
   childs: RuntimeFiber<any, any>[]
   effect: Effect<Success, Failure, never>
   status: RuntimeFiberStatus
-  channel: Channel<Either<any, any>>
+  channel: Channel<any>
   result?: Exit<Success, Failure>
   sync: boolean
   listeners: Array<

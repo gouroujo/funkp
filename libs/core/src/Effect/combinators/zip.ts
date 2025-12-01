@@ -1,17 +1,34 @@
-import * as Exit from '../../Exit'
-import * as RuntimeFiber from '../../RuntimeFiber'
-import * as Op from '../../RuntimeOp'
-import { fork, map } from '../operators'
+import * as O from 'src/RuntimeOp'
+import { map } from '../operators'
 
 import {
+  type Context,
   type Effect,
   type Failure,
-  type Requirements,
   type Success,
 } from '../effect'
+import { effectable } from '../internal/effectable'
 
 type Options = {
   concurrent?: boolean
+}
+
+function zipImpl<
+  A extends Effect<unknown, unknown, unknown>,
+  B extends Effect<unknown, unknown, unknown>,
+>(
+  a: A,
+  b: B,
+  options?: Options,
+): Effect<
+  [Success<A>, Success<B>],
+  Failure<A> | Failure<B>,
+  Context<A> | Context<B>
+> {
+  if (options?.concurrent) {
+    return effectable([O.parallel([a, b], 1)])
+  }
+  return effectable([O.parallel([a, b], 1)])
 }
 
 export function zip<
@@ -24,36 +41,13 @@ export function zip<
 ): Effect<
   [Success<A>, Success<B>],
   Failure<A> | Failure<B>,
-  Requirements<A> | Requirements<B>
+  Context<A> | Context<B>
 > {
-  return {
-    *[Symbol.iterator]() {
-      const promises: Promise<
-        Exit.Exit<Success<A> | Success<B>, Failure<A> | Failure<B>>
-      >[] = []
-      for (const effect of [a, b]) {
-        const fiber = yield* fork(effect)
-        const i = promises.push(RuntimeFiber.await(fiber))
-        if (options?.concurrent !== true) {
-          yield Op.promise(promises[i - 1])
-        }
-      }
-      try {
-        return yield Op.promise(
-          Promise.all(promises).then((exits) =>
-            exits.map((exit) => {
-              if (Exit.isSuccess(exit)) {
-                return exit.success
-              }
-              throw exit.failure
-            }),
-          ),
-        )
-      } catch (error) {
-        throw yield Op.fail(error as Failure<A> | Failure<B>)
-      }
-    },
-  }
+  return effectable([
+    O.iterate(function* () {
+      return yield* zipImpl(a, b, options)
+    }),
+  ])
 }
 
 export function zipWith<
@@ -65,7 +59,7 @@ export function zipWith<
   b: B,
   fn: (arg: [Success<A>, Success<B>]) => T,
   options?: Options,
-): Effect<T, Failure<A> | Failure<B>, Requirements<A> | Requirements<B>> {
+): Effect<T, Failure<A> | Failure<B>, Context<A> | Context<B>> {
   return map(fn)(zip(a, b, options))
 }
 

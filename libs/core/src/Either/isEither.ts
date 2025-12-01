@@ -1,4 +1,4 @@
-import type { Either } from '.'
+import { isRight, type Either } from '.'
 
 export function isEither<L, R>(either: unknown): either is Either<L, R>
 export function isEither<L, R>(either: Either<L, R>): either is Either<L, R>
@@ -11,6 +11,10 @@ export function isEither<L, R>(
     '_tag' in either &&
     (either._tag === 'Left' || either._tag === 'Right')
   )
+}
+
+export function getEither<L, R>(either: Either<L, R>): L | R {
+  return isRight(either) ? either.right : either.left
 }
 
 if (import.meta.vitest) {

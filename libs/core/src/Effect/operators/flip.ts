@@ -1,5 +1,8 @@
-import type { Effect } from '..'
-import { fail, pure } from 'src/RuntimeOp'
+import * as E from 'src/Either'
+import * as O from 'src/RuntimeOp'
+
+import { fail, succeed, type Effect } from '..'
+import { effectable } from '../internal/effectable'
 
 /**
  * Swaps the success and failure channels of an Effect.
@@ -33,32 +36,26 @@ import { fail, pure } from 'src/RuntimeOp'
  * ```
  */
 export function flip<A, E, R>(self: Effect<A, E, R>): Effect<E, A, R> {
-  return {
-    *[Symbol.iterator]() {
-      let selfSucceeded = false
-      try {
-        const success = yield* self
-        // Mark that self succeeded before attempting to fail
-        selfSucceeded = true
-        // self succeeded, we want to fail with this value
-        throw yield fail(success)
-      } catch (error) {
-        // If self originally succeeded, re-throw to propagate the failure
-        if (selfSucceeded) {
-          throw error
-        }
-        // self failed, we want to succeed with the error
-        return yield pure(error as E)
+  return effectable([
+    ...self.ops,
+    O.iterate(function* (prevValue?: E.Either<E, A>) {
+      if (prevValue && E.isRight(prevValue)) {
+        // Previous was success, so we fail with that value
+        return yield* fail(prevValue.right)
+      } else if (prevValue) {
+        // Previous was failure, so we succeed with that value
+        return yield* succeed(prevValue.left)
       }
-    },
-  }
+      throw new Error('flip: No previous value provided')
+    }),
+  ])
 }
 
 if (import.meta.vitest) {
   const { describe, it, expect, expectTypeOf } = import.meta.vitest
 
   describe('Effect.flip', async () => {
-    const Effect = await import('..')
+    const Effect = await import('src/Effect')
 
     it('should turn failures into successes', async () => {
       const effect = Effect.fail('oops' as const)
@@ -76,11 +73,9 @@ if (import.meta.vitest) {
 
     it('should preserve context type', async () => {
       type MyContext = { config: string }
-      const effect = Effect.succeed<number, never, MyContext>(100)
+      const effect: Effect<number, never, MyContext> = Effect.succeed(100)
       const flipped = flip(effect)
-      expectTypeOf(flipped).toEqualTypeOf<
-        Effect<never, number, MyContext>
-      >()
+      expectTypeOf(flipped).toEqualTypeOf<Effect<never, number, MyContext>>()
     })
 
     it('should work with pipe', async () => {
@@ -97,9 +92,7 @@ if (import.meta.vitest) {
     it('should work with double flip (identity)', async () => {
       const effect = Effect.succeed('hello')
       const doubleFlipped = flip(flip(effect))
-      expectTypeOf(doubleFlipped).toEqualTypeOf<
-        Effect<string, never, never>
-      >()
+      expectTypeOf(doubleFlipped).toEqualTypeOf<Effect<string, never, never>>()
       await expect(Effect.runPromise(doubleFlipped)).resolves.toEqual('hello')
     })
   })

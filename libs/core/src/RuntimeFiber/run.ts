@@ -7,9 +7,11 @@ import {
   YieldWrap,
   yieldWrapGet,
 } from 'src/Effect/internal/yieldwrap'
+import { InterruptedError } from 'src/Fiber'
 import { absurd, compose } from 'src/functions'
 import * as Op from 'src/RuntimeOp'
 import { Runtime } from '../Runtime'
+import { fork } from './fork'
 import { RuntimeFiber } from './types'
 
 function* effectToGenerator<Success>(
@@ -27,12 +29,8 @@ function* main<Success, Failure>(
     | Op.Operation<Success, Failure, any>
     | YieldWrap<Effect.Effect<any, any, any>>
   >,
-  channel: C.Channel<E.Either<unknown, unknown>>,
-): Generator<
-  C.Instruction<any>,
-  E.Either<Failure, Success>,
-  E.Either<unknown, unknown>
-> {
+  fiber: RuntimeFiber<Success, Failure>,
+): Generator<C.Instruction<any>, E.Either<Failure, Success>, unknown> {
   let current = ops.next()
   // let result: E.Either<unknown, unknown> = E.right()
   while (true) {
@@ -42,7 +40,7 @@ function* main<Success, Failure>(
 
     if (isYieldWrap(current.value)) {
       const effect = yieldWrapGet(current.value)
-      const result = yield* main(effectToGenerator(effect.ops), channel)
+      const result = yield* main(effectToGenerator(effect.ops), fiber)
       current = E.isRight(result)
         ? ops.next(result.right)
         : ops.throw(result.left) // Stop execution on failure
@@ -53,26 +51,22 @@ function* main<Success, Failure>(
       const op = current.value
       switch (op._op) {
         case Op.PURE_OP: {
-          yield C.take(channel)
-          const result = yield C.put(channel, E.right(op.value))
+          yield C.take(fiber.channel)
+          const result = yield C.put(fiber.channel, E.right(op.value))
           current = ops.next(result)
           break
         }
         case Op.FAIL_OP: {
-          yield C.take(channel)
-          const result = yield C.put(channel, E.left(op.failure))
+          yield C.take(fiber.channel)
+          const result = yield C.put(fiber.channel, E.left(op.failure))
           current = ops.next(result)
 
           break
         }
         case Op.ON_SUCCESS_OP: {
           if (E.isRight(op.value)) {
-            yield C.take(channel)
-            const value = op.fn(op.value.right)
-            const result = yield C.put(
-              channel,
-              value instanceof Promise ? value.then(E.right) : E.right(value),
-            )
+            const effect: any = op.fn(op.value.right)
+            const result = yield* main(effectToGenerator(effect.ops), fiber)
             current = ops.next(result)
           } else {
             current = ops.next(op.value)
@@ -81,12 +75,8 @@ function* main<Success, Failure>(
         }
         case Op.ON_FAILURE_OP: {
           if (E.isLeft(op.value)) {
-            yield C.take(channel)
-            const value = op.fn(op.value.left)
-            const result = yield C.put(
-              channel,
-              value instanceof Promise ? value.then(E.left) : E.left(value),
-            )
+            const effect: any = op.fn(op.value.left)
+            const result = yield* main(effectToGenerator(effect.ops), fiber)
             current = ops.next(result)
           } else {
             current = ops.next(op.value)
@@ -94,9 +84,9 @@ function* main<Success, Failure>(
           break
         }
         case Op.ASYNC_OP: {
-          yield C.take(channel)
+          yield C.take(fiber.channel)
           const result = yield C.put(
-            channel,
+            fiber.channel,
             op
               .fn()
               .then(E.right)
@@ -105,31 +95,55 @@ function* main<Success, Failure>(
           current = ops.next(result)
           break
         }
+        case Op.PARALLEL_OP: {
+          yield C.take(fiber.channel)
+          const concurrencyChannel = C.chan<unknown>(op.concurrency, {
+            strategy: 'fixed',
+          })
+          // TODO : Improve channel to use tokens and type the channel.close method with wait
+          C.go(
+            function* (
+              channel: C.Channel<unknown>,
+              effects: Effect.Effect<any, any, any>[],
+              rootFiber: RuntimeFiber<Success, Failure>,
+            ) {
+              const results: E.Either<any, any>[] = []
+              for (let i = 0; i < effects.length; i++) {
+                const effect = effects[i]
+                const token = yield C.take(channel)
+                const childFiber = fork(rootFiber, effect)
+                yield C.put(childFiber.channel, true)
+                const r = yield* main(effectToGenerator(effect.ops), childFiber)
+                results[i] = r
+                yield C.put(channel, token)
+              }
+              C.close(concurrencyChannel, E.all(results))
+            },
+            [concurrencyChannel, op.effects, fiber],
+          )
+          yield C.put(concurrencyChannel, true) // TODO: should be concurrency times
+          const result = yield C.put(fiber.channel, C.wait(concurrencyChannel))
+          current = ops.next(result)
+          break
+        }
         case Op.SLEEP_OP: {
-          yield C.sleep(channel, op.ms)
+          yield C.sleep(fiber.channel, op.ms)
           current = ops.next(E.right())
           break
         }
-        // case Op.FORK_OP: {
-        //   const childFiber = fork(fiber, op.effect)
-        //   // C.go(main, [childFiber])
-        //   result = yield C.put(channel, E.right(childFiber))
-        //   break
-        // }
-        // case Op.UNFOLD_OP: {
-        //   if (E.isRight(result)) {
-        //     result = yield* main(
-        //       (
-        //         result.right as Effect.Effect<unknown, unknown, never>
-        //       ).ops.values(),
-        //       channel,
-        //     )
-        //   }
-        //   break
-        // }
+        case Op.FORK_OP: {
+          const childFiber = fork(fiber, op.effect)
+          // C.go(main, [childFiber])
+          yield C.put(fiber.channel, E.right(childFiber))
+          break
+        }
+        case Op.INTERRUPT_OP: {
+          ops.throw(new InterruptedError())
+          break
+        }
         case Op.ITERATE_OP: {
           try {
-            const result = yield* main(op.fn(), channel)
+            const result = yield* main(op.fn(op.prevValue), fiber)
             current = ops.next(E.right(result))
           } catch (error) {
             current = ops.next(E.left(error))
@@ -150,10 +164,7 @@ export const runLoop = <Success, Failure, Context>(
   C.go(
     function* (fiber: RuntimeFiber<Success, Failure>) {
       yield C.put(fiber.channel, E.right())
-      const result = yield* main(
-        effectToGenerator(fiber.effect.ops),
-        fiber.channel,
-      )
+      const result = yield* main(effectToGenerator(fiber.effect.ops), fiber)
       C.close(fiber.channel, result)
     },
     [fiber],

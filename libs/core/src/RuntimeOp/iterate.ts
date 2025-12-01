@@ -1,9 +1,14 @@
+import { Either } from 'src/Either'
+
 export const ITERATE_OP = '@funkp/core/operator/iterate' as const
 export const iterate =
-  <T>(fn: () => Generator<any, any, any>) =>
-  () => ({
+  <T>(
+    fn: (prevValue?: Either<any, any> | undefined) => Generator<any, any, any>,
+  ) =>
+  (prevValue?: Either<any, any> | undefined) => ({
     _op: ITERATE_OP,
     fn,
+    ...(prevValue !== undefined ? { prevValue } : {}),
   })
 
 if (import.meta.vitest) {

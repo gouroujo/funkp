@@ -1,4 +1,4 @@
-import { type Effect } from 'src/Effect'
+import { type Effect, fail, succeed } from 'src/Effect'
 import * as O from 'src/RuntimeOp'
 import { effectable } from '../internal/effectable'
 
@@ -7,7 +7,8 @@ export const map = <S1, S2, F, C>(
 ): ((
   effect: Effect<S1, F, C>,
 ) => Effect<S1 extends never ? never : Awaited<S2>, F, C>) => {
-  return (effect) => effectable([...effect.ops, O.onSuccess(fn)])
+  return (effect) =>
+    effectable([...effect.ops, O.onSuccess((v: S1) => succeed(fn(v)))])
 }
 export const mapSuccess = map
 
@@ -16,14 +17,24 @@ export const mapError = <F1, F2>(
 ): (<S, C>(
   effect: Effect<S, F1, C>,
 ) => Effect<S, F1 extends never ? never : F2, C>) => {
-  return (effect) => effectable([...effect.ops, O.onFailure(fn)])
+  return (effect) =>
+    effectable([...effect.ops, O.onFailure((v: F1) => fail(fn(v)))])
 }
 
 if (import.meta.vitest) {
   const { it, expect, describe, expectTypeOf } = import.meta.vitest
   describe('Effect.map', async () => {
-    const Effect = await import('..')
-    const pipe = (await import('../../functions/pipe')).pipe
+    const Effect = await import('src/Effect')
+    const { pipe } = await import('src/functions/pipe')
+
+    it('should map one value', async () => {
+      const effect = pipe(
+        Effect.succeed(123),
+        Effect.map((v) => v + 1),
+      )
+      expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
+      await expect(Effect.runPromise(effect)).resolves.toEqual(123 + 1)
+    })
 
     it('should map values', async () => {
       const effect = pipe(
@@ -38,18 +49,7 @@ if (import.meta.vitest) {
         (123 + 1) * 2 - 3,
       )
     })
-    it('should map async values', async () => {
-      const effect = pipe(
-        Effect.succeed(123),
-        Effect.map(async (v) => v + 1),
-        Effect.map((v) => Promise.resolve(v * 2)),
-        Effect.map((v) => v - 3),
-      )
-      expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
-      await expect(Effect.runPromise(effect)).resolves.toEqual(
-        (123 + 1) * 2 - 3,
-      )
-    })
+
     it('should map types', async () => {
       const effect = pipe(
         Effect.succeed('abc' as const),

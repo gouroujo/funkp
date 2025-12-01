@@ -1,4 +1,6 @@
-import type { Effect } from 'src/Effect/effect'
+import type { Effect } from 'src/Effect'
+import type { Either } from 'src/Either'
+
 import { isObjectWithKey } from 'src/utils'
 import type { ASYNC_OP } from './async'
 import type { FAIL_OP } from './fail'
@@ -8,9 +10,9 @@ import type { INTERRUPT_OP } from './interrupt'
 import type { ITERATE_OP } from './iterate'
 import type { ON_FAILURE_OP } from './onFailure'
 import type { ON_SUCCESS_OP } from './onSuccess'
+import type { PARALLEL_OP } from './parallel'
 import type { PURE_OP } from './pure'
 import type { SLEEP_OP } from './sleep'
-import type { UNFOLD_OP } from './unfold'
 
 export * from './async'
 export * from './fail'
@@ -20,9 +22,9 @@ export * from './interrupt'
 export * from './iterate'
 export * from './onFailure'
 export * from './onSuccess'
+export * from './parallel'
 export * from './pure'
 export * from './sleep'
-export * from './unfold'
 
 export type OperationType<Op extends Operation<unknown, unknown, unknown>> =
   Op['_op']
@@ -58,5 +60,13 @@ export type Operation<Success = any, Failure = any, Context = any> =
   | { _op: typeof SLEEP_OP; ms: number }
   | { _op: typeof INJECT_OP; token: string }
   | { _op: typeof INTERRUPT_OP }
-  | { _op: typeof UNFOLD_OP }
-  | { _op: typeof ITERATE_OP; fn: () => Generator<any, any, any> }
+  | {
+      _op: typeof ITERATE_OP
+      prevValue?: Either<any, any> | undefined
+      fn: (prevValue: Either<any, any> | undefined) => Generator<any, any, any>
+    }
+  | {
+      _op: typeof PARALLEL_OP
+      concurrency: number
+      effects: Effect<any, any, any>[]
+    }

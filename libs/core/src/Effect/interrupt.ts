@@ -10,7 +10,8 @@ if (import.meta.vitest) {
   const { describe, it, expect, vi } = import.meta.vitest
 
   describe('Effect.interrupt', async () => {
-    const Effect = await import('.')
+    const Effect = await import('src/Effect')
+    const { InterruptedError } = await import('src/Fiber')
 
     it('should interrupt the current fiber', async () => {
       const spy = vi.fn()
@@ -21,7 +22,9 @@ if (import.meta.vitest) {
         spy('done')
         return 42
       })
-      await expect(Effect.runPromise(program)).rejects.toEqual('Interrupted')
+      await expect(Effect.runPromise(program)).rejects.toBeInstanceOf(
+        InterruptedError,
+      )
       expect(spy).toHaveBeenCalledWith('start')
       expect(spy).not.toHaveBeenCalledWith('done')
       expect(spy).toHaveBeenCalledTimes(1)

@@ -1,3 +1,4 @@
+export * from './flatmap'
 export * from './flatten'
 export * from './flip'
 export * from './fork'

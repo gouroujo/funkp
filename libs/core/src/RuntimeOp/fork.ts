@@ -18,10 +18,7 @@ if (import.meta.vitest) {
           "_op": "@funkp/core/operator/fork",
           "value": {
             "ops": [
-              {
-                "_op": "@funkp/core/operator/pure",
-                "value": 42,
-              },
+              [Function],
             ],
             Symbol(Symbol.iterator): [Function],
           },
