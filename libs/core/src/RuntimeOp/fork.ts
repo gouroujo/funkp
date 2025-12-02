@@ -3,7 +3,7 @@ export const fork =
   <T>(effect: T) =>
   () => ({
     _op: FORK_OP,
-    value: effect,
+    effect,
   })
 
 if (import.meta.vitest) {
@@ -16,7 +16,7 @@ if (import.meta.vitest) {
       expect(operation()).toMatchInlineSnapshot(`
         {
           "_op": "@funkp/core/operator/fork",
-          "value": {
+          "effect": {
             "ops": [
               [Function],
             ],

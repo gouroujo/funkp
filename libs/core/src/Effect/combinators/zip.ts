@@ -13,7 +13,7 @@ type Options = {
   concurrent?: boolean
 }
 
-function zipImpl<
+export function zip<
   A extends Effect<unknown, unknown, unknown>,
   B extends Effect<unknown, unknown, unknown>,
 >(
@@ -29,25 +29,6 @@ function zipImpl<
     return effectable([O.parallel([a, b], 1)])
   }
   return effectable([O.parallel([a, b], 1)])
-}
-
-export function zip<
-  A extends Effect<unknown, unknown, unknown>,
-  B extends Effect<unknown, unknown, unknown>,
->(
-  a: A,
-  b: B,
-  options?: Options,
-): Effect<
-  [Success<A>, Success<B>],
-  Failure<A> | Failure<B>,
-  Context<A> | Context<B>
-> {
-  return effectable([
-    O.iterate(function* () {
-      return yield* zipImpl(a, b, options)
-    }),
-  ])
 }
 
 export function zipWith<

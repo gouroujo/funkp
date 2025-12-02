@@ -2,8 +2,8 @@ import * as C from 'src/Channel'
 import * as Exit from '../Exit'
 import { RuntimeFiber } from './types'
 
-export default function <Success, Failure>(
-  fiber: RuntimeFiber<Success, Failure>,
+export default function <Success, Failure, Context>(
+  fiber: RuntimeFiber<Success, Failure, Context>,
 ): Promise<Exit.Exit<Success, Failure>> {
   return C.wait(fiber.channel).then((either) => {
     return Exit.fromEither(either)

@@ -17,7 +17,7 @@ if (import.meta.vitest) {
       const spy = vi.fn()
       const program = Effect.gen(function* () {
         spy('start')
-        yield* Effect.sleep(10)
+        yield* Effect.succeed('foo')
         yield* Effect.interrupt()
         spy('done')
         return 42

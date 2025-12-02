@@ -1,8 +1,8 @@
 import * as Exit from '../Exit'
 import { RuntimeFiber } from './types'
 
-export const terminate = <Success, Failure>(
-  fiber: RuntimeFiber<Success, Failure>,
+export const terminate = <Success, Failure, Context>(
+  fiber: RuntimeFiber<Success, Failure, Context>,
 ) => {
   return (result: Exit.Exit<Success, Failure>) => {
     fiber.status = 'closed'

@@ -1,4 +1,5 @@
 import type { Channel } from 'src/Channel'
+import type { Runtime } from 'src/Runtime'
 import type { Brand } from '../Brand'
 import type { Effect } from '../Effect'
 import type { Exit } from '../Exit'
@@ -10,10 +11,11 @@ export type RuntimeFiberStatus =
   | 'closed'
   | 'interrupted'
 
-export interface RuntimeFiber<Success, Failure> {
+export interface RuntimeFiber<Success, Failure, Context> {
   id: RuntimeFiberId
-  parent?: RuntimeFiber<unknown, unknown>
-  childs: RuntimeFiber<any, any>[]
+  runtime: Runtime<Context>
+  parent?: RuntimeFiber<unknown, unknown, unknown>
+  childs: RuntimeFiber<any, any, any>[]
   effect: Effect<Success, Failure, never>
   status: RuntimeFiberStatus
   channel: Channel<any>

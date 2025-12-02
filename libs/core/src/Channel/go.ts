@@ -5,7 +5,7 @@ import { close } from './close'
 import { type Instruction, put } from './instructions'
 
 export const go = <T, A extends unknown[] = never[]>(
-  genFn: (...args: A) => Generator<Instruction<T>, void, T>,
+  genFn: (...args: A) => Generator<Instruction<T>, unknown, T>,
   args: A,
 ) => {
   const gen = genFn(...args)
@@ -13,8 +13,8 @@ export const go = <T, A extends unknown[] = never[]>(
 }
 
 const go_ = <T>(
-  generator: Generator<Instruction<T>, void, T>,
-  step: IteratorResult<Instruction<T>, void>,
+  generator: Generator<Instruction<T>, unknown, T>,
+  step: IteratorResult<Instruction<T>, unknown>,
 ) => {
   if (step.done === false) {
     const instruction = step.value

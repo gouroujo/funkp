@@ -10,7 +10,6 @@ import {
 import { InterruptedError } from 'src/Fiber'
 import { absurd, compose } from 'src/functions'
 import * as Op from 'src/RuntimeOp'
-import { Runtime } from '../Runtime'
 import { fork } from './fork'
 import { RuntimeFiber } from './types'
 
@@ -24,13 +23,12 @@ function* effectToGenerator<Success>(
   return result
 }
 
-function* main<Success, Failure>(
+function* main(
   ops: Generator<
-    | Op.Operation<Success, Failure, any>
-    | YieldWrap<Effect.Effect<any, any, any>>
+    Op.Operation<any, any, any> | YieldWrap<Effect.Effect<any, any, any>>
   >,
-  fiber: RuntimeFiber<Success, Failure>,
-): Generator<C.Instruction<any>, E.Either<Failure, Success>, unknown> {
+  fiber: RuntimeFiber<any, any, any>,
+): Generator<C.Instruction<any>, E.Either<any, any>, unknown> {
   let current = ops.next()
   // let result: E.Either<unknown, unknown> = E.right()
   while (true) {
@@ -49,6 +47,7 @@ function* main<Success, Failure>(
 
     if (Op.isOperation(current.value)) {
       const op = current.value
+      console.log('OP', op)
       switch (op._op) {
         case Op.PURE_OP: {
           yield C.take(fiber.channel)
@@ -105,7 +104,7 @@ function* main<Success, Failure>(
             function* (
               channel: C.Channel<unknown>,
               effects: Effect.Effect<any, any, any>[],
-              rootFiber: RuntimeFiber<Success, Failure>,
+              rootFiber: RuntimeFiber<any, any>,
             ) {
               const results: E.Either<any, any>[] = []
               for (let i = 0; i < effects.length; i++) {
@@ -132,9 +131,10 @@ function* main<Success, Failure>(
           break
         }
         case Op.FORK_OP: {
-          const childFiber = fork(fiber, op.effect)
-          // C.go(main, [childFiber])
-          yield C.put(fiber.channel, E.right(childFiber))
+          yield C.take(fiber.channel)
+          const childFiber = runLoop(fork(fiber, op.effect))
+          current = ops.next(E.right(childFiber))
+          yield C.put(fiber.channel, true)
           break
         }
         case Op.INTERRUPT_OP: {
@@ -158,11 +158,10 @@ function* main<Success, Failure>(
 }
 
 export const runLoop = <Success, Failure, Context>(
-  fiber: RuntimeFiber<Success, Failure>,
-  runtime: Runtime<Context>,
-): RuntimeFiber<Success, Failure> => {
+  fiber: RuntimeFiber<Success, Failure, Context>,
+): RuntimeFiber<Success, Failure, Context> => {
   C.go(
-    function* (fiber: RuntimeFiber<Success, Failure>) {
+    function* (fiber: RuntimeFiber<Success, Failure, Context>) {
       yield C.put(fiber.channel, E.right())
       const result = yield* main(effectToGenerator(fiber.effect.ops), fiber)
       C.close(fiber.channel, result)

@@ -18,7 +18,7 @@ type OperationHandlers<Op extends Op.Operation[]> = {
     },
     context: {
       runtime: Runtime<any>
-      fiber: RuntimeFiber<any, any>
+      fiber: RuntimeFiber<any, any, any>
     },
   ) => void
 }
