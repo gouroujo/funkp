@@ -17,7 +17,11 @@ import type { Left } from '..'
  * // l is { _tag: 'Left', left: 'error' }
  * ```
  */
-export const left = <L>(leftValue: L): Left<L> => ({
-  _tag: 'Left',
-  left: leftValue,
-})
+export function left(): Left<void>
+export function left<L>(leftValue: L): Left<L>
+export function left<L>(leftValue?: L): Left<L> {
+  return {
+    _tag: 'Left',
+    left: leftValue as L,
+  }
+}

@@ -7,19 +7,21 @@ export const sleep = (ms: number): Effect<void, never, never> => {
 }
 
 if (import.meta.vitest) {
-  const { it, expect, describe, expectTypeOf } = import.meta.vitest
+  const { it, expect, describe, expectTypeOf, vi } = import.meta.vitest
+  const Effect = await import('src/Effect')
+
   describe('Effect.sleep', async () => {
-    const runPromise = (await import('../run')).runPromise
-
     it('should return an Effect<void, never, never>', () => {
-      expectTypeOf(sleep(10)).toEqualTypeOf<Effect<void, never, never>>()
+      expectTypeOf(Effect.sleep(10)).toEqualTypeOf<Effect<void, never, never>>()
     })
-
-    it('should resolve after the specified delay', async () => {
+    it('should resolve after the specified delay', async ({onTestFinished}) => {
+      vi.useFakeTimers()
+      onTestFinished(() => void vi.useRealTimers())
       const start = Date.now()
-      await expect(runPromise(sleep(50))).resolves.toBeUndefined()
-      const elapsed = Date.now() - start
-      expect(elapsed).toBeGreaterThanOrEqual(50)
+      const promise = Effect.runPromise(Effect.sleep(50))
+      await vi.runAllTimersAsync()
+      await expect(promise).resolves.toBeUndefined()
+      expect(Date.now() - start).toBeGreaterThanOrEqual(50)
     })
   })
 }

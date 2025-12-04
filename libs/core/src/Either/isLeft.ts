@@ -1,3 +1,4 @@
+import { isObjectWithKeyValue } from 'src/utils'
 import { Either, Left } from '.'
 
 /**
@@ -26,30 +27,31 @@ export function isLeft<L, R>(either: Either<L, R>): either is Left<L>
 export function isLeft<L, R>(
   either: Either<L, R> | unknown,
 ): either is Left<L> {
-  return (
-    typeof either === 'object' &&
-    either !== null &&
-    '_tag' in either &&
-    either._tag === 'Left'
-  )
+  return isObjectWithKeyValue(either, '_tag', 'Left')
 }
 
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
-  it('should return false for non-Either values', () => {
-    expect(isLeft(42)).toBe(false)
-    expect(isLeft('string')).toBe(false)
-    expect(isLeft({})).toBe(false)
-    expect(isLeft(null)).toBe(false)
-    expect(isLeft(undefined)).toBe(false)
-  })
-  it('should return true for Left', () => {
-    const left: Either<string, number> = { _tag: 'Left', left: 'error' }
-    expect(isLeft(left)).toBe(true)
-  })
+  const { describe, it, expect, expectTypeOf } = import.meta.vitest
+  describe('Either.isLeft', () => {
+    it.each([42, 'foo', null, undefined, true, false, {}, { _tag: 'a' }])(
+      'should return false for non-Either values: "%s"',
+      (v) => {
+        expect(isLeft(v)).toBe(false)
+      },
+    )
+    it('should return true for Left', () => {
+      const left: Either<string, number> = { _tag: 'Left', left: 'error' }
+      expect(isLeft(left)).toBe(true)
+      if (isLeft(left)) expectTypeOf(left).toEqualTypeOf<Left<string>>()
+    })
+    it('should return true for unknow that a Left', () => {
+      const left: unknown = { _tag: 'Left', left: 'error' }
+      if (isLeft(left)) expectTypeOf(left).toEqualTypeOf<Left<unknown>>()
+    })
 
-  it('should return false for Right', () => {
-    const right: Either<string, number> = { _tag: 'Right', right: 42 }
-    expect(isLeft(right)).toBe(false)
+    it('should return false for Right', () => {
+      const right: Either<string, number> = { _tag: 'Right', right: 42 }
+      expect(isLeft(right)).toBe(false)
+    })
   })
 }

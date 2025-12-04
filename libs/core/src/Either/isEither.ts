@@ -1,3 +1,4 @@
+import { isObjectWithKey } from 'src/utils'
 import { isRight, type Either } from '.'
 
 export function isEither<L, R>(either: unknown): either is Either<L, R>
@@ -6,9 +7,7 @@ export function isEither<L, R>(
   either: Either<L, R> | unknown,
 ): either is Either<L, R> {
   return (
-    typeof either === 'object' &&
-    either !== null &&
-    '_tag' in either &&
+    isObjectWithKey(either, '_tag') &&
     (either._tag === 'Left' || either._tag === 'Right')
   )
 }

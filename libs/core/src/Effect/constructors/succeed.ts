@@ -1,55 +1,59 @@
+import { Narrow } from 'src/utils'
 import * as Op from '../../RuntimeOp'
 
 import type { Effect } from '../effect'
 import { effectable } from '../internal/effectable'
 
 export const succeed = <Success>(
-  value: Success,
+  value: Narrow<Success>,
 ): Effect<Success, never, never> => {
   return effectable<Success, never, never>([Op.pure(value)])
 }
 
-export function of<Success>(value: Success) {
-  return succeed(value)
-}
+export const of = succeed
 
 if (import.meta.vitest) {
   const { it, expect, describe, expectTypeOf } = import.meta.vitest
-  describe('Effect.succeed', async () => {
-    const runPromise = (await import('../run')).runPromise
+  const Effect = await import('src/Effect')
 
+  describe('Effect.succeed', () => {
+    it('should narrow down the type', () => {
+      expectTypeOf(succeed(42)).toEqualTypeOf<Effect<42, never, never>>()
+      expectTypeOf(succeed('foo')).toEqualTypeOf<Effect<'foo', never, never>>()
+      expectTypeOf(succeed(true)).toEqualTypeOf<Effect<true, never, never>>()
+    })
     it.each([123, 0, -1, 3.14, Number.MAX_VALUE, Number.MIN_VALUE, NaN])(
       'should succeed with the provided number : "%d"',
       async (v) => {
-        const effect = succeed(v)
+        const effect = Effect.succeed(v)
         expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
-        const result = await runPromise(effect)
+        const result = await Effect.runPromise(effect)
         expect(result).toEqual(v)
       },
     )
     it.each(['foo', '', ' '])(
       'should succeed with the provided string: "%s"',
       async (v) => {
-        const effect = succeed(v)
+        const effect = Effect.succeed(v)
         expectTypeOf(effect).toEqualTypeOf<Effect<string, never, never>>()
-        const result = await runPromise(effect)
+        const result = await Effect.runPromise(effect)
         expect(result).toEqual(v)
       },
     )
     it.each([true, false])(
       'should succeed with the provided boolean: "%s"',
       async (v) => {
-        const effect = succeed(v)
+        const effect = Effect.succeed(v)
         expectTypeOf(effect).toEqualTypeOf<Effect<boolean, never, never>>()
-        const result = await runPromise(effect)
+        const result = await Effect.runPromise(effect)
         expect(result).toEqual(v)
       },
     )
     it.each([null, undefined])(
       'should succeed with special values : "%s"',
       async (v) => {
-        const effect = succeed(v)
-        const result = await runPromise(effect)
+        const effect = Effect.succeed(v)
+        const result = await Effect.runPromise(effect)
         expect(result).toEqual(v)
       },
     )

@@ -1,8 +1,8 @@
-import { effectable } from 'src/Effect/internal/effectable'
+import { fail, succeed, type Effect } from 'src/Effect'
+import { isSuccess } from 'src/Exit'
+import * as RuntimeFiber from 'src/RuntimeFiber'
 import * as O from 'src/RuntimeOp'
-import { fail, succeed, type Effect } from '../Effect'
-import { isSuccess } from '../Exit'
-import * as RuntimeFiber from '../RuntimeFiber'
+import { effectable } from '../internal/effectable'
 
 export const join = <Success, Failure, Context>(
   fiber: RuntimeFiber.RuntimeFiber<Success, Failure, Context>,
@@ -10,7 +10,6 @@ export const join = <Success, Failure, Context>(
   return effectable([
     O.promise(() => RuntimeFiber.await(fiber)),
     O.onSuccess((exit) => {
-      console.log(exit)
       if (isSuccess(exit)) {
         return succeed(exit.success)
       } else {
@@ -24,19 +23,18 @@ if (import.meta.vitest) {
   const { describe, it, expect, expectTypeOf } = import.meta.vitest
   describe('Fiber.join', async () => {
     const Effect = await import('src/Effect')
-    const Fiber = await import('src/Fiber')
     const Runtime = await import('src/Runtime')
     it('should join a succesfull fiber', async () => {
       const effect = Effect.succeed(42)
       const fiber = Runtime.runFork()(effect)
-      const joined = Fiber.join(fiber)
-      expectTypeOf(joined).toEqualTypeOf<Effect<number, never, never>>()
+      const joined = Effect.join(fiber)
+      expectTypeOf(joined).toEqualTypeOf<Effect<42, never, never>>()
       await expect(Effect.runPromise(joined)).resolves.toEqual(42)
     })
     it('should join a fail fiber', async () => {
-      const effect = Effect.fail('boo' as const)
+      const effect = Effect.fail('boo')
       const fiber = Runtime.runFork()(effect)
-      const joined = Fiber.join(fiber)
+      const joined = Effect.join(fiber)
       expectTypeOf(joined).toEqualTypeOf<Effect<never, 'boo', never>>()
       await expect(Effect.runPromise(joined)).rejects.toEqual('boo')
     })

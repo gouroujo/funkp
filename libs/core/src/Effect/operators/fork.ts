@@ -19,7 +19,6 @@ if (import.meta.vitest) {
 
   describe('Effect.fork', async () => {
     const Effect = await import('src/Effect')
-    const Fiber = await import('../../Fiber')
     const fib = (n: number): Effect<number> =>
       n < 2
         ? Effect.succeed(1)
@@ -34,7 +33,7 @@ if (import.meta.vitest) {
       const fib10Fiber = fork(effect)
       const program = Effect.gen(function* () {
         const fiber = yield* fib10Fiber
-        const n = yield* Fiber.join(fiber)
+        const n = yield* Effect.join(fiber)
         return n
       })
       await expect(Effect.runPromise(program)).resolves.toBe(89)
