@@ -1,23 +1,31 @@
 import { isObjectWithKey } from 'src/utils/object/isObjectWithKey'
-import { buffer, type Buffer, type BufferStrategy } from './buffer'
+import * as Buffer from './buffer'
 
-type Options = {
-  strategy?: BufferStrategy
+type Options<T, V extends T = T> = {
+  strategy?: Buffer.BufferStrategy
+  fill?: V
 }
 
 export type Channel<T> = {
   _tag: 'channel'
   takers: ((value: T) => void)[]
   // onLeft: ((value: L | null) => void)[]
-  buffer: Buffer<T>
+  buffer: Buffer.Buffer<T>
   listeners: [resolve: (result: T) => void, reject: (result: T) => void][]
   closed: boolean
 }
 
-export function chan<T>(bufferSize?: number, options?: Options): Channel<T> {
+export function chan<T>(
+  bufferSize?: number,
+  options: Options<T> = {},
+): Channel<T> {
+  const buf = Buffer.buffer<T>(bufferSize ?? 1, options.strategy ?? 'fixed')
+  if ('fill' in options) {
+    Buffer.fillWith(buf, options.fill)
+  }
   return {
     _tag: 'channel',
-    buffer: buffer(bufferSize ?? 1, options?.strategy ?? 'fixed'),
+    buffer: buf,
     closed: false,
     takers: [],
     // onLeft: [],

@@ -98,30 +98,28 @@ function* main(
           yield C.take(fiber.channel)
           const concurrencyChannel = C.chan<unknown>(op.concurrency, {
             strategy: 'fixed',
+            fill: true,
           })
-          // TODO : Improve channel to use tokens and type the channel.close method with wait
-          C.go(
-            function* (
-              channel: C.Channel<unknown>,
-              effects: Effect.Effect<any, any, any>[],
-              rootFiber: RuntimeFiber<any, any>,
-            ) {
-              const results: E.Either<any, any>[] = []
-              for (let i = 0; i < effects.length; i++) {
-                const effect = effects[i]
-                const token = yield C.take(channel)
-                const childFiber = fork(rootFiber, effect)
-                yield C.put(childFiber.channel, true)
-                const r = yield* main(effectToGenerator(effect.ops), childFiber)
-                results[i] = r
-                yield C.put(channel, token)
-              }
-              C.close(concurrencyChannel, E.all(results))
-            },
-            [concurrencyChannel, op.effects, fiber],
+          const promises: Promise<E.Either<any, any>>[] = []
+          for (let i = 0; i < op.effects.length; i++) {
+            const effect = op.effects[i]
+            // Fork each effect in it's own fiber
+            const childFiber = fork(fiber, effect)
+            // run each fiber separetly
+            C.go(
+              function* (c, f) {
+                yield C.take(c) // maybe we can put first and take when done
+                runLoop(f)
+                yield C.put(c, C.wait(f.channel))
+              },
+              [concurrencyChannel, childFiber],
+            )
+            promises[i] = C.wait(childFiber.channel)
+          }
+          const result = yield C.put(
+            fiber.channel,
+            Promise.all(promises).then(E.all),
           )
-          yield C.put(concurrencyChannel, true) // TODO: should be concurrency times
-          const result = yield C.put(fiber.channel, C.wait(concurrencyChannel))
           current = ops.next(result)
           break
         }

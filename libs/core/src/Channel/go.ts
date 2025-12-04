@@ -6,7 +6,7 @@ import { type Instruction, put } from './instructions'
 
 export const go = <T, A extends unknown[] = never[]>(
   genFn: (...args: A) => Generator<Instruction<T>, unknown, T>,
-  args: A,
+  args: [...A],
 ) => {
   const gen = genFn(...args)
   go_(gen, gen.next())

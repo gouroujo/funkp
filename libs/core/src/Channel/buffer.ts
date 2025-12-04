@@ -4,12 +4,20 @@ import * as O from 'src/Option'
 export type BufferStrategy = 'fixed' | 'dropping' | 'sliding'
 
 export type Buffer<T> = {
+  _size: number
   _buffer: T[]
   put: (el: T) => boolean
   take: () => O.Option<T>
   size: () => number
 }
 export const isEmpty = <T>(buf: Buffer<T>): boolean => buf.size() === 0
+export const fillWith = <T, V extends T>(buf: Buffer<T>, value: V): void => {
+  let index = buf._buffer.length
+  while (index < buf._size) {
+    buf._buffer[index] = value
+    index++
+  }
+}
 
 export const MAX_BUFFER_SIZE = 1024
 
@@ -39,6 +47,7 @@ export const buffer = <T>(
 
 export const droppingBuffer = <T>(size: number): Buffer<T> => ({
   _buffer: [] as T[],
+  _size: size,
   put(element: T): boolean {
     if (this._buffer.length >= size) return true
     this._buffer.push(element)
@@ -54,6 +63,7 @@ export const droppingBuffer = <T>(size: number): Buffer<T> => ({
 })
 export const fixedBuffer = <T>(size: number): Buffer<T> => ({
   _buffer: [] as T[],
+  _size: size,
   put(element: T): boolean {
     if (this._buffer.length >= size) return false
     this._buffer.push(element)
@@ -69,6 +79,7 @@ export const fixedBuffer = <T>(size: number): Buffer<T> => ({
 })
 export const slidingBuffer = <T>(size: number): Buffer<T> => ({
   _buffer: [] as T[],
+  _size: size,
   put(element: T): boolean {
     const length = this._buffer.push(element)
     if (length > size) this._buffer.shift()
@@ -96,9 +107,9 @@ if (import.meta.vitest) {
       expect(buf.size()).toBe(2)
       expect(buf.put(3)).toBe(false)
       expect(buf.size()).toBe(2)
-      expect(buf.take()).toBe(1)
-      expect(buf.take()).toBe(2)
-      expect(buf.take()).toBe(null)
+      expect(buf.take()).toEqualSome(1)
+      expect(buf.take()).toEqualSome(2)
+      expect(buf.take()).toBeNone()
       expect(buf.size()).toBe(0)
     })
 
@@ -111,9 +122,9 @@ if (import.meta.vitest) {
       expect(buf.size()).toBe(2)
       expect(buf.put(3)).toBe(true)
       expect(buf.size()).toBe(2)
-      expect(buf.take()).toBe(1)
-      expect(buf.take()).toBe(2)
-      expect(buf.take()).toBe(null)
+      expect(buf.take()).toEqualSome(1)
+      expect(buf.take()).toEqualSome(2)
+      expect(buf.take()).toBeNone()
       expect(buf.size()).toBe(0)
     })
 
@@ -126,9 +137,9 @@ if (import.meta.vitest) {
       expect(buf.size()).toBe(2)
       expect(buf.put(3)).toBe(true)
       expect(buf.size()).toBe(2)
-      expect(buf.take()).toBe(2)
-      expect(buf.take()).toBe(3)
-      expect(buf.take()).toBe(null)
+      expect(buf.take()).toEqualSome(2)
+      expect(buf.take()).toEqualSome(3)
+      expect(buf.take()).toBeNone()
       expect(buf.size()).toBe(0)
     })
 
@@ -142,21 +153,21 @@ if (import.meta.vitest) {
       expect(buf.put('a')).toBe(true)
       expect(buf.put('b')).toBe(true)
       expect(buf.put('c')).toBe(false)
-      expect(buf.take()).toBe('a')
-      expect(buf.take()).toBe('b')
-      expect(buf.take()).toBe(null)
+      expect(buf.take()).toEqualSome('a')
+      expect(buf.take()).toEqualSome('b')
+      expect(buf.take()).toBeNone()
 
       const objBuf = buffer<{ x: number }>(1, 'dropping')
       expect(objBuf.put({ x: 42 })).toBe(true)
       expect(objBuf.put({ x: 99 })).toBe(true)
       expect(objBuf.size()).toBe(1)
-      expect(objBuf.take()).toEqual({ x: 42 })
-      expect(objBuf.take()).toBe(null)
+      expect(objBuf.take()).toEqualSome({ x: 42 })
+      expect(objBuf.take()).toBeNone()
     })
 
     it('should handle empty buffer take', () => {
       const buf = buffer<number>(2, 'fixed')
-      expect(buf.take()).toBe(null)
+      expect(buf.take()).toBeNone()
     })
   })
 }

@@ -69,20 +69,21 @@ if (import.meta.vitest) {
     it('should combine async effect run concurrently', async ({
       onTestFinished,
     }) => {
-      vi.useFakeTimers()
-      onTestFinished(() => void vi.useRealTimers()) // Reset timers even if the test fail
-      const start = Date.now()
+      // vi.useFakeTimers()
+      // onTestFinished(() => void vi.useRealTimers()) // Reset timers even if the test fail
       const mock = vi.fn()
       const effect = Effect.all(
-        [Effect.sleep(1500), Effect.sleep(2000), Effect.sleep(10)],
+        [Effect.sleep(150), Effect.sleep(200), Effect.sleep(10)],
         {
           concurrency: 2,
         },
       )
-      Effect.runPromise(effect).then(mock)
-      await vi.runAllTimersAsync()
+      const start = Date.now()
+      await Effect.runPromise(effect).then(mock)
+      // await vi.runAllTimersAsync()
       expect(mock).toHaveBeenCalled()
-      expect(Date.now() - start).toBeLessThanOrEqual(2100)
+      console.log(Date.now() - start)
+      expect(Date.now() - start).toBeLessThanOrEqual(210)
     })
   })
 
