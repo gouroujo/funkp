@@ -1,3 +1,4 @@
+import { Option } from 'src/Option'
 import { isObjectWithKey } from 'src/utils/object/isObjectWithKey'
 import * as Buffer from './buffer'
 
@@ -6,12 +7,12 @@ type Options<T, V extends T = T> = {
   fill?: V
 }
 
-export type Channel<T> = {
+export type Channel<T, LasValue = T> = {
   _tag: 'channel'
-  takers: ((value: T) => void)[]
+  takers: ((value: Option<T>) => void)[]
   // onLeft: ((value: L | null) => void)[]
   buffer: Buffer.Buffer<T>
-  listeners: [resolve: (result: T) => void, reject: (result: T) => void][]
+  listeners: ((value: LasValue) => void)[]
   closed: boolean
 }
 

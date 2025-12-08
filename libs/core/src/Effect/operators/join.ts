@@ -28,11 +28,11 @@ if (import.meta.vitest) {
       const effect = Effect.succeed(42)
       const fiber = Runtime.runFork()(effect)
       const joined = Effect.join(fiber)
-      expectTypeOf(joined).toEqualTypeOf<Effect<42, never, never>>()
+      expectTypeOf(joined).toEqualTypeOf<Effect<number, never, never>>()
       await expect(Effect.runPromise(joined)).resolves.toEqual(42)
     })
     it('should join a fail fiber', async () => {
-      const effect = Effect.fail('boo')
+      const effect = Effect.fail('boo' as const)
       const fiber = Runtime.runFork()(effect)
       const joined = Effect.join(fiber)
       expectTypeOf(joined).toEqualTypeOf<Effect<never, 'boo', never>>()

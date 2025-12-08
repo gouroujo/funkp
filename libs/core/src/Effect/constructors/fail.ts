@@ -1,10 +1,9 @@
-import { Narrow } from 'src/utils'
 import * as Op from '../../RuntimeOp'
 import type { Effect } from '../effect'
 import { effectable } from '../internal/effectable'
 
 export const fail = <Failure>(
-  failure: Narrow<Failure>,
+  failure: Failure,
 ): Effect<never, Failure, never> => {
   return effectable<never, Failure, never>([Op.fail(failure)])
 }
@@ -16,7 +15,7 @@ if (import.meta.vitest) {
   describe('Effect.fail', () => {
     it('should fail with the provided number', async () => {
       const effect = Effect.fail(123)
-      expectTypeOf(effect).toEqualTypeOf<Effect<never, 123, never>>()
+      expectTypeOf(effect).toEqualTypeOf<Effect<never, number, never>>()
       await expect(Effect.runPromise(effect)).rejects.toEqual(123)
     })
     it('should fail with the provided string', async () => {
@@ -26,7 +25,7 @@ if (import.meta.vitest) {
     })
     it('should fail with the provided number', async () => {
       const effect = Effect.fail(true)
-      expectTypeOf(effect).toEqualTypeOf<Effect<never, true, never>>()
+      expectTypeOf(effect).toEqualTypeOf<Effect<never, boolean, never>>()
       await expect(Effect.runPromise(effect)).rejects.toEqual(true)
     })
   })

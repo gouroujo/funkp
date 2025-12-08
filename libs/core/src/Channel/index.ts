@@ -4,4 +4,5 @@ export * from './go'
 export * from './instructions'
 export * from './isClosed'
 export * from './isEmpty'
-export * from './wait'
+export * from './promise'
+

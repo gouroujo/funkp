@@ -54,7 +54,7 @@ if (import.meta.vitest) {
     })
     it('should not flatmap success values', async () => {
       const effect = pipe(
-        Effect.succeed('success'),
+        Effect.succeed('success' as const),
         Effect.flatmapError((v) => Effect.fail(v + 1)),
       )
       expectTypeOf(effect).toEqualTypeOf<Effect<'success', never, never>>()

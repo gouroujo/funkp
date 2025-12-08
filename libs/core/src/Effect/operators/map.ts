@@ -52,7 +52,7 @@ if (import.meta.vitest) {
 
     it('should map types', async () => {
       const effect = pipe(
-        Effect.succeed('abc'),
+        Effect.succeed('abc' as const),
         Effect.map((v) => v.toUpperCase() as Uppercase<typeof v>),
         Effect.map((v) => `${v}!` as const),
       )
@@ -61,7 +61,7 @@ if (import.meta.vitest) {
     })
     it('should not map failures', async () => {
       const effect = pipe(
-        Effect.fail('error'),
+        Effect.fail('error' as const),
         Effect.map((v) => v + 1),
         Effect.mapError((v) => `${v}!` as const),
         Effect.map((v) => v * 2),
@@ -100,7 +100,7 @@ if (import.meta.vitest) {
     })
     it('should map failure types', async () => {
       const effect = pipe(
-        Effect.fail('abc'),
+        Effect.fail('abc' as const),
         Effect.mapError((v) => v.toUpperCase() as Uppercase<typeof v>),
         Effect.mapError((v) => `${v}!` as const),
       )

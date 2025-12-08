@@ -20,7 +20,7 @@ export * from './operators'
  * // l.left === 'fail'
  * ```
  */
-export interface Left<L = any> {
+export interface Left<L = unknown> {
   readonly _tag: 'Left'
   readonly left: L
 }
@@ -40,7 +40,7 @@ export interface Left<L = any> {
  * // r.right === 42
  * ```
  */
-export interface Right<R> {
+export interface Right<R = unknown> {
   readonly _tag: 'Right'
   readonly right: R
 }
@@ -72,7 +72,7 @@ export interface Right<R> {
  * }
  * ```
  */
-export type Either<L, R> = Left<L> | Right<R>
+export type Either<L = unknown, R = unknown> = Left<L> | Right<R>
 
 /**
  * Extracts the Right value type from an {@link Either} type.

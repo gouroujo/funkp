@@ -1,4 +1,4 @@
-import { inject } from '../Fiber/instructions'
+import { inject } from 'src/RuntimeOp'
 
 export type ServiceType = ReturnType<typeof inject>
 

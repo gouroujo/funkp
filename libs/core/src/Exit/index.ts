@@ -52,3 +52,9 @@ export const fromEither = <Success, Failure>(
 ): Exit<Success, Failure> => {
   return E.isRight(either) ? succeed(either.right) : fail(either.left)
 }
+
+export const toEither = <Success, Failure>(
+  exit: Exit<Success, Failure>,
+): E.Either<Failure, Success> => {
+  return isSuccess(exit) ? E.right(exit.success) : E.left(exit.failure)
+}

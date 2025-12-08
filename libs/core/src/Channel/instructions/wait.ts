@@ -1,19 +1,19 @@
 import type { Channel } from '../chan'
 
-export type PutInstruction<T> = {
-  _tag: 'put'
-  value: T
+export type WaitInstruction<T> = {
+  _tag: 'wait'
+  value: Promise<unknown>
   channel: Channel<T, any>
   callback?: (value: T) => void
 }
 
-export function put<T>(
+export function wait<T>(
   channel: Channel<T, any>,
-  value: T,
+  value: Promise<unknown>,
   callback?: (value: T) => void,
-): PutInstruction<T> {
+): WaitInstruction<T> {
   return {
-    _tag: 'put',
+    _tag: 'wait',
     value,
     channel,
     ...(callback ? { callback } : {}),

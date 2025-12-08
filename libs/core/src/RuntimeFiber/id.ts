@@ -1,5 +1,5 @@
 import { nominal } from '../Brand'
-import type { RuntimeFiberId } from './types'
+import type { RuntimeFiberId } from './fiber'
 
 export const Id = () => {
   const construct = nominal<RuntimeFiberId>()

@@ -30,7 +30,7 @@ if (import.meta.vitest) {
 
     it('should fork an effect into a separate fiber', async () => {
       const effect = fib(10)
-      const fib10Fiber = fork(effect)
+      const fib10Fiber = Effect.fork(effect)
       const program = Effect.gen(function* () {
         const fiber = yield* fib10Fiber
         const n = yield* Effect.join(fiber)

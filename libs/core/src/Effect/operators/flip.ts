@@ -67,7 +67,7 @@ if (import.meta.vitest) {
     it('should turn successes into failures', async () => {
       const effect = Effect.succeed(42)
       const flipped = flip(effect)
-      expectTypeOf(flipped).toEqualTypeOf<Effect<never, 42, never>>()
+      expectTypeOf(flipped).toEqualTypeOf<Effect<never, number, never>>()
       await expect(Effect.runPromise(flipped)).rejects.toEqual(42)
     })
 
@@ -90,7 +90,7 @@ if (import.meta.vitest) {
     })
 
     it('should work with double flip (identity)', async () => {
-      const effect = Effect.succeed('hello')
+      const effect = Effect.succeed('hello' as const)
       const doubleFlipped = flip(flip(effect))
       expectTypeOf(doubleFlipped).toEqualTypeOf<Effect<'hello', never, never>>()
       await expect(Effect.runPromise(doubleFlipped)).resolves.toEqual('hello')

@@ -1,15 +1,17 @@
+import * as E from 'src/Either'
 import * as Exit from '../Exit'
-import { RuntimeFiber } from './types'
 
-export const terminate = <Success, Failure, Context>(
-  fiber: RuntimeFiber<Success, Failure, Context>,
+import { RuntimeFiber } from './fiber'
+
+export const terminate = <Success, Failure>(
+  fiber: RuntimeFiber<Success, Failure>,
 ) => {
-  return (result: Exit.Exit<Success, Failure>) => {
+  return (value: E.Either<Success, Failure>) => {
     fiber.status = 'closed'
-
-    fiber.result = result
-    fiber.listeners.forEach(([resolve, reject]) => {
-      resolve(result)
+    const exit = Exit.fromEither(value)
+    fiber.result = exit
+    fiber.listeners.forEach(([resolve]) => {
+      resolve(exit)
     })
   }
 }

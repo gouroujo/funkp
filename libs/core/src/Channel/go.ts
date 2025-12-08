@@ -2,18 +2,19 @@ import { absurd } from 'src/functions'
 import * as O from 'src/Option'
 import type { Channel } from './chan'
 import { close } from './close'
-import { type Instruction, put } from './instructions'
+import { type Instruction } from './instructions'
 
 export const go = <T, A extends unknown[] = never[]>(
   genFn: (...args: A) => Generator<Instruction<T>, unknown, T>,
   args: [...A],
 ) => {
   const gen = genFn(...args)
-  go_(gen, gen.next())
+  const nextValue = gen.next()
+  go_(gen, nextValue)
 }
 
 const go_ = <T>(
-  generator: Generator<Instruction<T>, unknown, T>,
+  generator: Generator<Instruction<T>, unknown, unknown>,
   step: IteratorResult<Instruction<T>, unknown>,
 ) => {
   if (step.done === false) {
@@ -21,33 +22,33 @@ const go_ = <T>(
     switch (instruction._tag) {
       case 'take': {
         const { channel } = instruction
+        // TODO: handle closed channel
         const value = channel.buffer.take()
         if (O.isSome(value)) {
           setImmediate(() => go_(generator, generator.next(value.value)))
         } else {
           channel.takers.push((v) => {
-            go_(generator, generator.next(v))
+            if (O.isSome(v)) go_(generator, generator.next(v.value))
           })
         }
         break
       }
       case 'put': {
         const { channel, value } = instruction
-        if (value instanceof Promise) {
-          value.then((resolved) =>
-            go_(generator, { done: false, value: put(channel, resolved) }),
-          )
-          break
-        }
         const firstTaker = channel.takers.shift()
         if (firstTaker) {
-          setImmediate(() => firstTaker(value))
+          setImmediate(() => firstTaker(O.some(value)))
           go_(generator, generator.next(value))
         } else if (channel.buffer.put(value)) {
           go_(generator, generator.next(value))
         } else {
           setImmediate(() => go_(generator, step))
         }
+        break
+      }
+      case 'wait': {
+        const { value } = instruction
+        value.then((resolved) => go_(generator, generator.next(resolved)))
         break
       }
       case 'sleep': {
@@ -68,7 +69,7 @@ if (import.meta.vitest) {
   const { it, describe, expect, vi } = import.meta.vitest
   const { put, take, sleep } = await import('./instructions')
   const { chan } = await import('./chan')
-  const { wait } = await import('./wait')
+  const { promise: wait } = await import('./promise')
 
   describe('Channel.go : Ping/Pong CSP', () => {
     type Ball = {

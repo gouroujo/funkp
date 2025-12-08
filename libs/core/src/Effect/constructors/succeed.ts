@@ -1,11 +1,10 @@
-import { Narrow } from 'src/utils'
 import * as Op from '../../RuntimeOp'
 
 import type { Effect } from '../effect'
 import { effectable } from '../internal/effectable'
 
 export const succeed = <Success>(
-  value: Narrow<Success>,
+  value: Success,
 ): Effect<Success, never, never> => {
   return effectable<Success, never, never>([Op.pure(value)])
 }
@@ -17,11 +16,6 @@ if (import.meta.vitest) {
   const Effect = await import('src/Effect')
 
   describe('Effect.succeed', () => {
-    it('should narrow down the type', () => {
-      expectTypeOf(succeed(42)).toEqualTypeOf<Effect<42, never, never>>()
-      expectTypeOf(succeed('foo')).toEqualTypeOf<Effect<'foo', never, never>>()
-      expectTypeOf(succeed(true)).toEqualTypeOf<Effect<true, never, never>>()
-    })
     it.each([123, 0, -1, 3.14, Number.MAX_VALUE, Number.MIN_VALUE, NaN])(
       'should succeed with the provided number : "%d"',
       async (v) => {

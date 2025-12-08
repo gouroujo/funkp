@@ -19,7 +19,7 @@ if (import.meta.vitest) {
   describe('Effect.flatten', () => {
     it('should flatten success values', async () => {
       const effect = pipe(Effect.succeed(Effect.succeed(123)), Effect.flatten())
-      expectTypeOf(effect).toEqualTypeOf<Effect<123, never, never>>()
+      expectTypeOf(effect).toEqualTypeOf<Effect<number, never, never>>()
       await expect(Effect.runPromise(effect)).resolves.toEqual(123)
     })
     it('should not flatten fail values', async () => {

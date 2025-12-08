@@ -1,11 +1,11 @@
 import type { Effect } from '../Effect'
 import { create } from './create'
-import type { RuntimeFiber } from './types'
+import type { RuntimeFiber } from './fiber'
 
-export const fork = <Success, Failure, Context>(
-  fiber: RuntimeFiber<any, any, Context>,
+export const fork = <Success, Failure>(
+  fiber: RuntimeFiber<any, any>,
   effect: Effect<Success, Failure, never>,
-): RuntimeFiber<Success, Failure, Context> => {
+): RuntimeFiber<Success, Failure> => {
   const child = create(effect, fiber.runtime, fiber)
   fiber.childs.push(child)
   return child
