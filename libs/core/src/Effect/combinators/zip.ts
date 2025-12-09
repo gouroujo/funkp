@@ -41,7 +41,12 @@ export function zipWith<
   fn: (arg: [Success<A>, Success<B>]) => T,
   options?: Options,
 ): Effect<T, Failure<A> | Failure<B>, Context<A> | Context<B>> {
-  return map(fn)(zip(a, b, options))
+  return map<
+    [Success<A>, Success<B>],
+    T,
+    Failure<A> | Failure<B>,
+    Context<A> | Context<B>
+  >(fn)(zip(a, b, options))
 }
 
 if (import.meta.vitest) {
@@ -75,8 +80,9 @@ if (import.meta.vitest) {
 
     it('propagates failure from either effect', async () => {
       const a = Effect.succeed(1)
-      const b = Effect.fail('err')
+      const b = Effect.fail('err' as const)
       const z = Effect.zipWith(a, b, ([a, b]) => `${a}-${b}`)
+      expectTypeOf(z).toEqualTypeOf<Effect<string, 'err', never>>()
       await expect(Effect.runPromise(z)).rejects.toEqual('err')
     })
   })

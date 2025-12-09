@@ -11,6 +11,7 @@ export const promise =
     fn,
     ...(catchFn ? { catchFn } : {}),
   })
+
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
   describe('Operation.Async', () => {

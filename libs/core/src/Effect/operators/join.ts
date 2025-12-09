@@ -5,7 +5,7 @@ import * as O from 'src/RuntimeOp'
 import { effectable } from '../internal/effectable'
 
 export const join = <Success, Failure, Context>(
-  fiber: RuntimeFiber.RuntimeFiber<Success, Failure, Context>,
+  fiber: RuntimeFiber.RuntimeFiber<Success, Failure>,
 ): Effect<Success, Failure, never> => {
   return effectable([
     O.promise(() => RuntimeFiber.await(fiber)),

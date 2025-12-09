@@ -1,6 +1,6 @@
-export * from './isNone'
-export * from './isSome'
 export * from './none'
+export * from './operators'
+export * from './refinements'
 export * from './some'
 
 /**
@@ -8,7 +8,10 @@ export * from './some'
  *
  * @typeParam T - The type of the value
  */
-export type Option<T> = Some<T> | None
+export type Option<T = never> = Some<T> | None
+
+export type OptionValue<O extends Option<unknown>> =
+  O extends Option<infer V> ? V : never
 
 /**
  * Represents a value present in Option.

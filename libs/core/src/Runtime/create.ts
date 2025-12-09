@@ -1,8 +1,9 @@
+import { Context, createEmptyContext } from 'src/Context'
 import { Runtime } from '.'
 
-export const create = <R>(context?: any): Runtime<R> => {
+export const create = <R>(context?: Context<R>): Runtime<R> => {
   return {
-    context: context ?? {},
+    context: context ?? createEmptyContext(),
     fiberRefs: [],
     flags: {
       cooperativeYielding: true,

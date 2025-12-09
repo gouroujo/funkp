@@ -11,7 +11,7 @@ import { Option } from '.'
  * // o is { _tag: 'Some', value: 42 }
  * ```
  */
-export function some<T>(value: T): Option<T> {
+export const some = <T>(value: T): Option<T> => {
   return { _tag: 'Some', value }
 }
 

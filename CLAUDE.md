@@ -101,6 +101,7 @@ The core library uses a multi-entry point architecture via `package.json` export
 
 - Tests are colocated in the same file at the end, guarded by `if (import.meta.vitest)` blocks
 - Use Vitest's `it` and `expect` and `expectTypeOf` from `import.meta.vitest`
+- Import required module at the beginning of a test with a dynamic import so that the test should be similar of how the lib user will call the function.
 - Test both happy path and edge cases. Target 100% test coverage.
 - Test type inference with `expectTypeOf`
 - Example pattern from `libs/core/src/Either/operators/bimap.ts:50-75`

@@ -1,5 +1,4 @@
 import { Effect, gen, map, runPromise, succeed } from '../Effect'
-import { injectFiber } from '../Fiber/inject'
 import { pipe } from '../functions'
 import { Service, ServiceContainer } from './requirement'
 
@@ -7,17 +6,7 @@ export function provide<Impl, R extends ServiceContainer<Impl>>(
   requirement: R,
   implementation: Impl,
 ) {
-  return <S, E, A extends InstanceType<R>>(
-    effect: Effect<S, E, A>,
-  ): Effect<S, E, Exclude<A, InstanceType<R>>> => ({
-    *[Symbol.iterator]() {
-      const fiber = yield* injectFiber()
-      fiber.context ??= {}
-      fiber.context.services ??= new Map()
-      fiber.context.services.set(requirement.id, implementation)
-      return yield* effect
-    },
-  })
+  return
 }
 
 if (import.meta.vitest) {

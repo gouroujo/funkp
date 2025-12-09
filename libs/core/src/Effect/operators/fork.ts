@@ -6,11 +6,7 @@ import { effectable } from '../internal/effectable'
 
 export const fork = <Success, Failure, Context>(
   effect: Effect<Success, Failure, Context>,
-): Effect<
-  RuntimeFiber.RuntimeFiber<Success, Failure, Context>,
-  never,
-  never
-> => {
+): Effect<RuntimeFiber.RuntimeFiber<Success, Failure>, never, never> => {
   return effectable([Op.fork(effect)])
 }
 

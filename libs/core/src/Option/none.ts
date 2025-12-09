@@ -1,4 +1,4 @@
-import { Option } from '.'
+import { None } from '.'
 
 /**
  * The singleton None value.
@@ -9,6 +9,6 @@ import { Option } from '.'
  * // o is { _tag: 'None' }
  * ```
  */
-export const none = (): Option<never> => ({
+export const none = (): None => ({
   _tag: 'None',
 })

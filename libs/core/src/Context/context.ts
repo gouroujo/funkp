@@ -1,4 +1,4 @@
 export type Context<R> = {
-  services?: Map<R, any>
+  services: Map<R, any>
   // concurrency?: number | 'unbounded'
 }

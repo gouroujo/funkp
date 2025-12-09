@@ -1,4 +1,4 @@
-import { Option, Some } from '.'
+import { Option, Some } from '..'
 
 /**
  * Type guard to check if an Option is Some.

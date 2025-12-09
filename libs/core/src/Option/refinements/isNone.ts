@@ -1,4 +1,4 @@
-import { None, none, Option, some } from '.'
+import { None, Option } from '..'
 
 /**
  * Type guard to check if an Option is None.
@@ -17,12 +17,13 @@ export function isNone<T>(option: Option<T>): option is None {
 
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
+  const Option = await import('src/Option')
 
   it('should return true for None', () => {
-    expect(isNone(none())).toBe(true)
+    expect(Option.isNone(Option.none())).toBe(true)
   })
 
   it('should return false for Some', () => {
-    expect(isNone(some(1))).toBe(false)
+    expect(Option.isNone(Option.some(1))).toBe(false)
   })
 }

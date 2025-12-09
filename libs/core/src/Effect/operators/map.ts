@@ -6,7 +6,7 @@ export const map = <S1, S2, F, C>(
   fn: (value: S1) => S2,
 ): ((
   effect: Effect<S1, F, C>,
-) => Effect<S1 extends never ? never : Awaited<S2>, F, C>) => {
+) => Effect<S1 extends never ? never : S2, F, C>) => {
   return (effect) =>
     effectable([...effect.ops, O.onSuccess((v: S1) => succeed(fn(v)))])
 }

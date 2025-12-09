@@ -35,7 +35,6 @@ if (import.meta.vitest) {
   })
 
   describe('Effect.tryCatch', async () => {
-    const runPromise = (await import('../run')).runPromise
     it('should handle async failure', async () => {
       const effect = Effect.tryCatch(
         () => Promise.reject('FAILURE'),

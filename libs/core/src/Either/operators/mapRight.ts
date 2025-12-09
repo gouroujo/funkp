@@ -1,16 +1,16 @@
 import type { Either } from '..'
-import { left } from '../constructors/left'
 import { right } from '../constructors/right'
 import { isRight } from '../isRight'
 
 /**
  * Maps a function over the `Right` value of an `Either`.
  *
- * If the `Either` is `Right`, applies the provided function to the right value and returns a new `Right`.
- * If the `Either` is `Left`, returns the original `Left` unchanged.
+ * If the `Either` is `Right`, applies the provided function to the right value and
+ * returns a new `Right` containing the mapped value. If the `Either` is `Left`,
+ * the original `Left` is returned unchanged (with its type adapted to the new
+ * `Either<L, R2>` shape via a type cast).
  *
- * @typeParam L - Type of the Left value
- * @typeParam R - Type of the original Right value
+ * @typeParam R1 - Type of the original Right value
  * @typeParam R2 - Type of the mapped Right value
  * @param mapFn - The function to apply to the `Right` value
  * @returns A function that takes an `Either` and returns a mapped `Either`
@@ -32,10 +32,8 @@ import { isRight } from '../isRight'
  * // mappedL is { _tag: 'Left', left: 'fail' }
  * ```
  */
-export function mapRight<R, R2>(
-  mapFn: (r: R) => R2,
-): <L>(either: Either<L, R>) => Either<L, R2> {
-  return (either) => {
+export const mapRight = <R1, R2>(mapFn: (r: R1) => R2) => {
+  return <L = never>(either: Either<L, R1>): Either<L, R2> => {
     if (isRight(either)) {
       return right(mapFn(either.right))
     }
@@ -45,41 +43,24 @@ export function mapRight<R, R2>(
 
 /**
  * Alias for {@link mapRight}. Useful for compatibility with other functional libraries.
- *
- * @typeParam L - Type of the Left value
- * @typeParam R - Type of the original Right value
- * @typeParam R2 - Type of the mapped Right value
- * @param mapFn - The function to apply to the `Right` value
- * @returns A function that takes an `Either` and returns a mapped `Either`
- *
- * @example
- * ```typescript
- * import { map, right, left, Either } from './mapRight'
- *
- * const inc = (n: number) => n + 1
- * const mapInc = map(inc)
- *
- * const r: Either<string, number> = right(5)
- * const mapped = mapInc(r)
- * // mapped is { _tag: 'Right', right: 6 }
- * ```
  */
 export const map = mapRight
 
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
+  const { it, expect, expectTypeOf } = import.meta.vitest
+  const Either = await import('src/Either')
 
   it('should map Right value', () => {
-    const r: Either<never, number> = right(42)
-    const mapR = mapRight((r: number) => r * 2)
-    const result = mapR(r)
-    expect(result).toEqual({ _tag: 'Right', right: 84 })
+    const r = Either.right(42)
+    const result = Either.mapRight((n: number) => n * 2)(r)
+    expect(result).toEqualRight(84)
+    expectTypeOf(result).toEqualTypeOf<Either<never, number>>()
   })
 
-  it('should return Left unchanged', () => {
-    const l: Either<never, never> = left(undefined as never)
-    const mapR = mapRight((r: never) => r)
-    const result = mapR(l)
-    expect(result).toEqual(l)
+  it('should return Left unchanged and keep Left type when Right is never', () => {
+    const left: Either<void, never> = Either.left()
+    const result = Either.mapRight((x: never) => x)(left)
+    expect(result).toBe(left)
+    expectTypeOf(result).toEqualTypeOf<Either<void, never>>()
   })
 }

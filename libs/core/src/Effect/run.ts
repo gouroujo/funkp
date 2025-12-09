@@ -10,7 +10,7 @@ export function runPromise<Success, Failure>(
 
 export function runFork<Success, Failure>(
   effect: Effect<Success, Failure, never>,
-): RuntimeFiber<Success, Failure, never> {
+): RuntimeFiber<Success, Failure> {
   return Runtime.runFork()(effect)
 }
 

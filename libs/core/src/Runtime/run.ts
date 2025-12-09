@@ -27,7 +27,7 @@ export const runFork =
   <Context = never>(runtime?: Runtime<Context>) =>
   <Success, Failure>(
     effect: Effect<Success, Failure, never>,
-  ): RuntimeFiber.RuntimeFiber<Success, Failure, Context> => {
+  ): RuntimeFiber.RuntimeFiber<Success, Failure> => {
     const fiber = RuntimeFiber.create(effect, runtime ?? defaultRuntime)
     return RuntimeFiber.runLoop(fiber)
   }
