@@ -1,7 +1,6 @@
 /// <reference types="vitest/config" />
-import * as path from 'path'
 import { defineConfig } from 'vite'
-import dts from 'vite-plugin-dts'
+// import dts from 'vite-plugin-dts'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
@@ -28,10 +27,10 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vite/<project-root>',
 
   plugins: [
-    dts({
-      entryRoot: '.',
-      tsconfigPath: path.join(__dirname, 'tsconfig.build.json'),
-    }),
+    // dts({
+    //   entryRoot: '.',
+    //   tsconfigPath: path.join(__dirname, 'tsconfig.build.json'),
+    // }),
     tsconfigPaths(),
     // nxViteTsPaths({ // ----> Doesn't work well with typescript baseUrl
     //   debug: true,

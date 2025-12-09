@@ -11,9 +11,9 @@
     "@eslint/js": "^9",
     "@nx/eslint": "^22",
     "@nx/eslint-plugin": "^22",
-    "@nx/js": "^22",
+    "@nx/js": "22",
     "@nx/node": "^22",
-    "@nx/vite": "^22",
+    "@nx/vitest": "^22",
     "@nx/web": "^22",
     "@types/node": "^24",
     "eslint": "^9",
@@ -24,13 +24,11 @@
     "nx": "^22",
     "prettier": "^3",
     "tslib": "^2.8",
-    "typescript": "~5.9",
+    "typescript": "5.9.3",
     "typescript-eslint": "^8",
-    "verdaccio": "^6",
-    "vite": "^7",
-    "vite-plugin-dts": "^4.5.4",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3"
+    "verdaccio": "^6.0.5",
+    "vite-tsconfig-paths": "^5",
+    "vitest": "^4"
   },
   "nx": {
     "includedScripts": [],
@@ -44,5 +42,6 @@
         }
       }
     }
-  }
+  },
+  "dependencies": {}
 }
