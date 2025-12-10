@@ -1,4 +1,4 @@
-import { None, Option } from '..'
+import type { None, Option } from '..'
 
 /**
  * Type guard to check if an Option is None.

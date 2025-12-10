@@ -15,15 +15,6 @@
   },
   "plugins": [
     {
-      "plugin": "@nx/js/typescript",
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        }
-      },
-      "exclude": []
-    },
-    {
       "plugin": "@nx/eslint/plugin",
       "options": {
         "targetName": "lint"
@@ -35,9 +26,28 @@
         "testTargetName": "test",
         "inSourceTests": true
       }
+    },
+    {
+      "plugin": "@nx/js/typescript",
+      "include": ["libs/*/*"],
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build",
+          "configName": "tsconfig.build.json"
+        }
+      }
     }
   ],
-  "targetDefaults": {},
+  "targetDefaults": {
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    }
+  },
   "release": {
     "version": {
       "preVersionCommand": "npx nx run-many -t build"

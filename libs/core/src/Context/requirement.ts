@@ -1,21 +1,21 @@
-import { inject } from 'src/RuntimeOp'
+import { Effect } from 'src/Effect'
+import { singleShotGen } from 'src/Effect/internal/singleshotgen'
+import { yieldWrap } from 'src/Effect/internal/yieldwrap'
+import * as Op from 'src/RuntimeOp'
+// export type ServiceType = ReturnType<typeof inject>
 
-export type ServiceType = ReturnType<typeof inject>
-
-export type FilterRequirement<T> = T extends ServiceType ? T : never
+// export type FilterRequirement<T> = T extends ServiceType ? T : never
 
 export const Service =
   (id: string) =>
-  <Self, Shape>() => {
-    return class implements ServiceType {
-      value = id
-      _action = 'inject' as const
-      id = id
-      static id = id
-      static *[Symbol.iterator](): Generator<Self, Shape, Shape> {
-        return yield inject(id) as Self
+  <Self, Shape>(): Effect<Shape, never, Self> &
+    (new (...args: any[]) => any) => {
+    return class {
+      static ops = [Op.pure(42 as Shape)]
+      static [Symbol.iterator]() {
+        return singleShotGen(yieldWrap(this))
       }
-    }
+    } satisfies Effect<Shape, never, Self>
   }
 
 // export const isRequirement = (value: unknown): value is Requirement =>

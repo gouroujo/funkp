@@ -1,8 +1,7 @@
 import { expect } from 'vitest'
-import type { EitherMatchers, OptionMatchers } from './matchers'
-import matchers from './matchers'
+import { type EitherMatchers, type OptionMatchers, matchers } from './matchers'
 
-expect.extend(matchers)
+expect.extend(matchers())
 
 declare module 'vitest' {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

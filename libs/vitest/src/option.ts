@@ -1,9 +1,10 @@
-import { MatchersObject } from '@vitest/expect'
+import type { MatchersObject } from '@vitest/expect'
 import 'vitest'
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { isNone, isSome } from '@funkp/core/Option'
 
-const matchers: MatchersObject = {
+const isSome = (o: any) => o._tag === 'Some'
+const isNone = (o: any) => o._tag === 'None'
+
+export const matchers: MatchersObject = {
   toBeSome(received) {
     const { isNot } = this
     return {
@@ -31,12 +32,11 @@ const matchers: MatchersObject = {
     }
   },
 }
-export default matchers
 
 export interface OptionMatchers<R = unknown> {
-  toBeSome: () => void
-  toBeNone: () => void
-  toEqualSome: (value: unknown) => void
+  toBeSome: () => R
+  toBeNone: () => R
+  toEqualSome: (value: unknown) => R
 }
 
 declare module 'vitest' {

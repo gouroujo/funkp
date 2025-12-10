@@ -47,6 +47,9 @@ export default defineConfig({
       provider: 'v8',
     },
     testTimeout: 500,
+    typecheck: {
+      enabled: true,
+    },
   },
   define: {
     'import.meta.vitest': 'undefined',

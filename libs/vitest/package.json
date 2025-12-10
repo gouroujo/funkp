@@ -2,22 +2,22 @@
   "name": "@funkp/vitest",
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/main.cjs.js",
-  "module": "./dist/main.es.js",
+  "main": "./dist/main.cjs",
+  "module": "./dist/main.mjs",
   "types": "./dist/main.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "development": "./src/main.ts",
       "types": "./dist/main.d.ts",
-      "import": "./dist/main.es.js",
-      "default": "./dist/main.cjs.js"
+      "import": "./dist/main.mjs",
+      "default": "./dist/main.cjs"
     },
     "./extend": {
       "development": "./src/extend.ts",
       "types": "./dist/extend.d.ts",
-      "import": "./dist/extend.es.js",
-      "default": "./dist/extend.cjs.js"
+      "import": "./dist/extend.mjs",
+      "default": "./dist/extend.cjs."
     }
   },
   "files": [
@@ -25,12 +25,13 @@
     "!**/*.tsbuildinfo"
   ],
   "peerDependencies": {
-    "@funkp/core": "0.0.1"
+    "@vitest/expect": "^4",
+    "vitest": "^4"
   },
   "nx": {
     "targets": {
       "build": {
-        "executor": "@nx/vite:build",
+        "executor": "@nx/esbuild:esbuild",
         "outputs": [
           "{options.outputPath}"
         ],
@@ -39,12 +40,14 @@
           "outputPath": "libs/vitest/dist",
           "main": "libs/vitest/src/main.ts",
           "tsConfig": "libs/vitest/tsconfig.build.json",
+          "additionalEntryPoints": [
+            "libs/vitest/src/extend.ts"
+          ],
           "format": [
             "esm",
             "cjs"
           ],
           "esbuildOptions": {
-            "sourcemap": true,
             "outExtension": {
               ".js": ".mjs",
               ".cjs": ".cjs"

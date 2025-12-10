@@ -1,7 +1,7 @@
-import { MatchersObject } from '@vitest/expect'
+import type { MatchersObject } from '@vitest/expect'
 import 'vitest'
 
-const matchers: MatchersObject = {
+export const matchers: MatchersObject = {
   toBeRight(received) {
     const { isNot } = this
     return {
@@ -39,13 +39,12 @@ const matchers: MatchersObject = {
     }
   },
 }
-export default matchers
 
 export interface EitherMatchers<R = unknown> {
-  toBeRight: () => void
-  toEqualRight: (value: unknown) => void
-  toBeLeft: () => void
-  toEqualLeft: (value: unknown) => void
+  toBeRight: () => R
+  toEqualRight: (value: unknown) => R
+  toBeLeft: () => R
+  toEqualLeft: (value: unknown) => R
 }
 
 declare module 'vitest' {

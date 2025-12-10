@@ -31,6 +31,7 @@ export type Try<A1 extends any, A2 extends any, Catch = never> = A1 extends A2
 type NarrowRaw<A> =
   | (A extends [] ? [] : never)
   | (A extends Narrowable ? A : never)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   | { [K in keyof A]: A[K] extends Function ? A[K] : NarrowRaw<A[K]> }
 
 /**
@@ -51,7 +52,7 @@ type NarrowRaw<A> =
  * // `A` inferred : {a: 1, b: 'c', d: ['e', 2, true, {f: ['g']}]}
  * ```
  */
-type Narrow<A extends any> = Try<A, [], NarrowRaw<A>>
+export type Narrow<A extends any> = Try<A, [], NarrowRaw<A>>
 
 if (import.meta.vitest) {
   const { describe, it, expectTypeOf } = import.meta.vitest

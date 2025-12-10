@@ -5,16 +5,26 @@ import { YieldWrap } from '../internal/yieldwrap'
 
 type ExtractFailure<T> = [T] extends [never]
   ? never
-  : [T] extends [YieldWrap<Effect<any, infer U, any>>]
+  : [T] extends [YieldWrap<Effect<unknown, infer U, unknown>>]
     ? U
     : never
 
+type ExtractContext<T> = [T] extends [never]
+  ? never
+  : [T] extends [YieldWrap<Effect<unknown, unknown, infer C>>]
+    ? C
+    : never
+
 export function gen<
-  YieldingValues extends YieldWrap<Effect<any, any, any>>,
+  YieldingValues extends YieldWrap<Effect<unknown, unknown, unknown>>,
   Success,
 >(
-  genFn: () => Generator<YieldingValues, Success, any>,
-): Effect<Success, ExtractFailure<YieldingValues>, never> {
+  genFn: () => Generator<YieldingValues, Success>,
+): Effect<
+  Success,
+  ExtractFailure<YieldingValues>,
+  ExtractContext<YieldingValues>
+> {
   return effectable([iterate(genFn)])
 }
 
@@ -23,6 +33,17 @@ if (import.meta.vitest) {
   const Effect = await import('src/Effect')
 
   describe('Effect.gen', () => {
+    it('should extract correct type', () => {
+      const effect1: Effect<number, 'err', 'aaa'> = Effect.succeed(42)
+      const effect2: Effect<number, 'err2', 'bbb'> = Effect.succeed(24)
+      const program = Effect.gen(function* () {
+        yield* effect2
+        return yield* effect1
+      })
+      expectTypeOf(program).toEqualTypeOf<
+        Effect<number, 'err' | 'err2', 'aaa' | 'bbb'>
+      >()
+    })
     it.each([
       'hello' as const,
       null,

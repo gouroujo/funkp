@@ -19,7 +19,7 @@ export const singleShotGen = <T, R = any>(
         >
       }
     },
-    throw(err: any): IteratorResult<YieldWrap<T>, R> {
+    throw(err: unknown): IteratorResult<YieldWrap<T>, R> {
       throw err
     },
     return(value?: R) {

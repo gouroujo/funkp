@@ -2,52 +2,52 @@
   "name": "@funkp/core",
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/main.cjs.js",
-  "module": "./dist/main.es.js",
+  "main": "./dist/main.cjs",
+  "module": "./dist/main.mjs",
   "types": "./dist/main.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "development": "./src/main.ts",
       "types": "./dist/main.d.ts",
-      "import": "./dist/main.es.js",
-      "default": "./dist/main.cjs.js"
+      "import": "./dist/main.mjs",
+      "default": "./dist/main.cjs"
     },
     "./functions": {
       "development": "./src/functions/index.ts",
       "types": "./dist/functions/index.d.ts",
-      "import": "./dist/functions.es.js",
-      "default": "./dist/functions.cjs.js"
+      "import": "./dist/functions.mjs",
+      "default": "./dist/functions.cjs"
     },
     "./Either": {
       "development": "./src/Either/index.ts",
       "types": "./dist/Either/index.d.ts",
-      "import": "./dist/Either.es.js",
-      "default": "./dist/Either.cjs.js"
+      "import": "./dist/Either.mjs",
+      "default": "./dist/Either.cjs"
     },
     "./Option": {
       "development": "./src/Option/index.ts",
       "types": "./dist/Option/index.d.ts",
-      "import": "./dist/Option.es.js",
-      "default": "./dist/Option.cjs.js"
+      "import": "./dist/Option.mjs",
+      "default": "./dist/Option.cjs"
     },
     "./Effect": {
       "development": "./src/Effect/index.ts",
       "types": "./dist/Effect/index.d.ts",
-      "import": "./dist/Effect.es.js",
-      "default": "./dist/Effect.cjs.js"
+      "import": "./dist/Effect.mjs",
+      "default": "./dist/Effect.cjs"
     },
     "./Brand": {
       "development": "./src/Brand/index.ts",
       "types": "./dist/Brand/index.d.ts",
-      "import": "./dist/Brand.es.js",
-      "default": "./dist/Brand.cjs.js"
+      "import": "./dist/Brand.mjs",
+      "default": "./dist/Brand.cjs"
     },
     "./Fiber": {
       "development": "./src/Fiber/index.ts",
       "types": "./dist/Fiber/index.d.ts",
-      "import": "./dist/Fiber.es.js",
-      "default": "./dist/Fiber.cjs.js"
+      "import": "./dist/Fiber.mjs",
+      "default": "./dist/Fiber.cjs"
     }
   },
   "files": [
@@ -59,9 +59,12 @@
     "@funkp/vitest": "0.0.1"
   },
   "nx": {
+    "implicitDependencies": [
+      "!@funkp/vitest"
+    ],
     "targets": {
       "build": {
-        "executor": "@nx/vite:build",
+        "executor": "@nx/esbuild:esbuild",
         "outputs": [
           "{options.outputPath}"
         ],
@@ -74,14 +77,29 @@
             "esm",
             "cjs"
           ],
+          "additionalEntryPoints": [
+            "./libs/core/src/functions",
+            "./libs/core/src/Either",
+            "./libs/core/src/Option",
+            "./libs/core/src/Effect",
+            "./libs/core/src/Brand",
+            "./libs/core/src/Fiber"
+          ],
+          "sourcemap": true,
+          "declarationRootDir": "libs/core/src",
+          "skipTypeCheck": true,
+          "declaration": false,
           "esbuildOptions": {
-            "sourcemap": true,
+            "treeShaking": true,
+            "minifySyntax": true,
             "outExtension": {
               ".js": ".mjs",
               ".cjs": ".cjs"
+            },
+            "define": {
+              "import.meta.vitest": "undefined"
             }
-          },
-          "declarationRootDir": "libs/core/src"
+          }
         }
       },
       "test": {
