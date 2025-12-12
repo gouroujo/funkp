@@ -1,13 +1,10 @@
-import type { Operation } from './_op'
-
 export const INJECT_OP = '@funkp/core/operator/inject' as const
 export const inject =
   <T>(token: T) =>
-  () =>
-    ({
-      _op: INJECT_OP,
-      value: token,
-    }) satisfies Operation<T>
+  () => ({
+    _op: INJECT_OP,
+    token,
+  })
 
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
@@ -17,7 +14,7 @@ if (import.meta.vitest) {
       expect(operation()).toMatchInlineSnapshot(`
         {
           "_op": "@funkp/core/operator/inject",
-          "value": "aaa",
+          "token": "aaa",
         }
       `)
     })

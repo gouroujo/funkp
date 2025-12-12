@@ -1,31 +1,49 @@
-import { Effect } from 'src/Effect'
+import type { Effect } from 'src/Effect'
 import { singleShotGen } from 'src/Effect/internal/singleshotgen'
 import { yieldWrap } from 'src/Effect/internal/yieldwrap'
 import * as Op from 'src/RuntimeOp'
-// export type ServiceType = ReturnType<typeof inject>
-
-// export type FilterRequirement<T> = T extends ServiceType ? T : never
+import { empty } from './empty'
 
 export const Service =
   (id: string) =>
-  <Self, Shape>(): Effect<Shape, never, Self> &
-    (new (...args: any[]) => any) => {
+  <Self, Shape>(): ServiceContainer<Self, Shape> => {
     return class {
-      static ops = [Op.pure(42 as Shape)]
+      static id = id
+      static context = empty()
+      static ops = [Op.inject(id)]
       static [Symbol.iterator]() {
         return singleShotGen(yieldWrap(this))
       }
-    } satisfies Effect<Shape, never, Self>
+    }
   }
 
-// export const isRequirement = (value: unknown): value is Requirement =>
-//   typeof value === 'object' &&
-//   value !== null &&
-//   '_tag' in value &&
-//   value._tag === 'requirement'
-
-export type ServiceContainer<Shape = any> = {
-  new (): ServiceType
+export interface ServiceContainer<Self, Shape> extends Effect<
+  Shape,
+  never,
+  Self
+> {
+  new (impl: Shape): any
   id: string
-  [Symbol.iterator](): Generator<ServiceType, Shape, Shape>
+}
+
+if (import.meta.vitest) {
+  const { describe, it, expectTypeOf } = import.meta.vitest
+  const Context = await import('src/Context')
+  const Effect = await import('src/Effect')
+
+  describe('Context.Service', () => {
+    it('should create a service', () => {
+      class Random extends Context.Service('MyRandomService')<
+        Random,
+        { readonly next: number }
+      >() {}
+
+      const program = Effect.gen(function* () {
+        const random = yield* Random
+        expectTypeOf(random).toEqualTypeOf<{ readonly next: number }>()
+        return random.next
+      })
+      expectTypeOf(program).toEqualTypeOf<Effect<number, never, Random>>()
+    })
+  })
 }

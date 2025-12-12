@@ -3,6 +3,7 @@ import { Effect } from '../Effect'
 import { Exit } from '../Exit'
 import * as RuntimeFiber from '../RuntimeFiber'
 import { defaultRuntime } from './create'
+import { mergeContext } from './mergeContext'
 
 export const runPromise =
   <Context = never>(runtime?: Runtime<Context>) =>
@@ -28,6 +29,7 @@ export const runFork =
   <Success, Failure>(
     effect: Effect<Success, Failure, never>,
   ): RuntimeFiber.RuntimeFiber<Success, Failure> => {
-    const fiber = RuntimeFiber.create(effect, runtime ?? defaultRuntime)
+    const _runtime = mergeContext(runtime ?? defaultRuntime, effect.context)
+    const fiber = RuntimeFiber.create(effect, _runtime)
     return RuntimeFiber.runLoop(fiber)
   }

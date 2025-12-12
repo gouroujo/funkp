@@ -23,6 +23,9 @@ if (import.meta.vitest) {
           "concurrency": 1,
           "effects": [
             {
+              "context": {
+                "services": Map {},
+              },
               "ops": [
                 [Function],
               ],

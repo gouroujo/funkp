@@ -1,4 +1,4 @@
-import type { Context, Effect, Failure, Success } from 'src/Effect'
+import type { Effect, Failure, Requirements, Success } from 'src/Effect'
 import { map } from 'src/Effect/operators/map'
 import * as O from 'src/RuntimeOp'
 import { effectable } from '../internal/effectable'
@@ -15,7 +15,7 @@ type Union<T extends unknown[]> = T[number]
 export const all = <E extends Effect<unknown, unknown, unknown>[]>(
   effects: [...E],
   options?: Options,
-): Effect<SuccessMap<E>, Failure<Union<E>>, Context<Union<E>>> => {
+): Effect<SuccessMap<E>, Failure<Union<E>>, Requirements<Union<E>>> => {
   return effectable([O.parallel(effects, concurrency(options?.concurrency))])
 }
 
@@ -23,8 +23,8 @@ export const allWith = <E extends Effect<unknown, unknown, unknown>[], Out>(
   effects: [...E],
   fn: (arg: SuccessMap<E>) => Out,
   options?: Options,
-): Effect<Out, Failure<Union<E>>, Context<Union<E>>> => {
-  return map<SuccessMap<E>, Out, Failure<Union<E>>, Context<Union<E>>>(fn)(
+): Effect<Out, Failure<Union<E>>, Requirements<Union<E>>> => {
+  return map<SuccessMap<E>, Out, Failure<Union<E>>, Requirements<Union<E>>>(fn)(
     all(effects, options),
   )
 }

@@ -2,10 +2,10 @@ import * as O from 'src/RuntimeOp'
 import { map } from '../operators'
 
 import {
-  type Context,
-  type Effect,
-  type Failure,
-  type Success,
+    type Effect,
+    type Failure,
+    type Requirements,
+    type Success,
 } from '../effect'
 import { effectable } from '../internal/effectable'
 
@@ -23,7 +23,7 @@ export function zip<
 ): Effect<
   [Success<A>, Success<B>],
   Failure<A> | Failure<B>,
-  Context<A> | Context<B>
+  Requirements<A> | Requirements<B>
 > {
   if (options?.concurrent) {
     return effectable([O.parallel([a, b], 1)])
@@ -40,12 +40,12 @@ export function zipWith<
   b: B,
   fn: (arg: [Success<A>, Success<B>]) => T,
   options?: Options,
-): Effect<T, Failure<A> | Failure<B>, Context<A> | Context<B>> {
+): Effect<T, Failure<A> | Failure<B>, Requirements<A> | Requirements<B>> {
   return map<
     [Success<A>, Success<B>],
     T,
     Failure<A> | Failure<B>,
-    Context<A> | Context<B>
+    Requirements<A> | Requirements<B>
   >(fn)(zip(a, b, options))
 }
 

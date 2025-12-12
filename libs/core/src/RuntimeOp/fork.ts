@@ -17,6 +17,9 @@ if (import.meta.vitest) {
         {
           "_op": "@funkp/core/operator/fork",
           "effect": {
+            "context": {
+              "services": Map {},
+            },
             "ops": [
               [Function],
             ],

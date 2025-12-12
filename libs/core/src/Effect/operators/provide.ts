@@ -1,13 +1,15 @@
-import { Effect } from '../effect'
+import * as Context from 'src/Context'
+import type { Effect } from '../effect'
 import { effectable } from '../internal/effectable'
 
-export const provide = <Success, Failure, Context, Service>(
-  service: Service,
-  implementation: any,
-): ((
-  effect: Effect<Success, Failure, Context>,
-) => Effect<Success, Failure, Exclude<Context, Service>>) => {
-  return (effect) => effectable([...effect.ops])
+export const provide = <Service, Implementation>(
+  service: Context.ServiceContainer<Service, Implementation>,
+  implementation: Implementation,
+): (<Success, Failure, Requirements>(
+  effect: Effect<Success, Failure, Requirements>,
+) => Effect<Success, Failure, Exclude<Requirements, Service>>) => {
+  const provider = Context.add(service, implementation)
+  return (effect) => effectable([...effect.ops], provider(effect.context))
 }
 
 if (import.meta.vitest) {
@@ -19,20 +21,40 @@ if (import.meta.vitest) {
     Random,
     { readonly next: Effect<number> }
   >() {}
+  class Service2 extends Context.Service('MyRandomService2')<
+    Service2,
+    { readonly aaa: 'foo' }
+  >() {}
 
   describe('Effect.provide', async () => {
     it('should provide a service to an effect', async () => {
-      const effect = Effect.gen(function* () {
+      const program = Effect.gen(function* () {
         const random = yield* Random
         const value = yield* random.next
         return value
       })
-      expectTypeOf(effect).toEqualTypeOf<Effect<number, never, Random>>()
+      expectTypeOf(program).toEqualTypeOf<Effect<number, never, Random>>()
       const providedEffect = Effect.provide(Random, {
         next: Effect.succeed(3),
-      })(effect)
-      expectTypeOf(providedEffect).toEqualTypeOf<Effect<number, never, never>>()
+      })(program)
+      expectTypeOf(providedEffect).toEqualTypeOf<Effect<number, never>>()
       await expect(Effect.runPromise(providedEffect)).resolves.toEqual(3)
+    })
+    it('should provide one service at a time', async () => {
+      const program = Effect.gen(function* () {
+        const fooService = yield* Service2
+        const random = yield* Random
+        return yield* random.next
+      })
+      expectTypeOf(program).toEqualTypeOf<
+        Effect<number, never, Random | Service2>
+      >()
+      const providedEffect = Effect.provide(Random, {
+        next: Effect.succeed(3),
+      })(program)
+      expectTypeOf(providedEffect).toEqualTypeOf<
+        Effect<number, never, Service2>
+      >()
     })
   })
 }

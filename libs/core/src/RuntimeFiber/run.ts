@@ -4,7 +4,7 @@ import * as E from 'src/Either'
 import * as Exit from 'src/Exit'
 
 import { isYieldWrap, yieldWrapGet } from 'src/Effect/internal/yieldwrap'
-import { InterruptedError } from 'src/Fiber'
+import { InterruptedError, MissingDependencyError } from 'src/Fiber'
 import { absurd, compose } from 'src/functions'
 import * as Op from 'src/RuntimeOp'
 import wait from './await'
@@ -166,9 +166,13 @@ function* main<Success, Failure>(
           break
         }
         case Op.INJECT_OP: {
-          const runtime = fiber.runtime
-          const token = op.token
-          // runtime.context.services
+          const context = fiber.runtime.context
+          const service = context.services.get(op.token)
+          if (context.services.has(op.token)) {
+            current = ops.next(E.right(service))
+          } else {
+            current = ops.throw(new MissingDependencyError(op.token))
+          }
           break
         }
         default:
@@ -189,7 +193,7 @@ export const runLoop = <Success, Failure>(
     if (error instanceof InterruptedError) {
       interrupt(fiber, error)
     }
-    console.error('error catched in runloop', error)
+    // console.error('error catched in runloop', error)
   }
   return Object.assign(fiber, { status: 'running' })
 }

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Context } from 'src/Context'
 import type { Operation } from 'src/RuntimeOp'
 import type { Either } from '../Either'
 import type { YieldWrap } from './internal/yieldwrap'
@@ -8,13 +9,14 @@ export type Success<T extends Effect<unknown, unknown, any>> =
   T extends Effect<infer S, unknown, any> ? S : never
 export type Failure<T extends Effect<unknown, unknown, any>> =
   T extends Effect<unknown, infer F, any> ? F : never
-export type Context<T extends Effect<unknown, unknown, any>> =
+export type Requirements<T extends Effect<unknown, unknown, any>> =
   T extends Effect<unknown, unknown, infer C> ? C : never
 
-export type Effect<Success, Failure = never, Context = never> = {
-  ops: ((prevValue?: unknown) => Operation<Success, Failure, Context>)[]
+export type Effect<Success, Failure = never, Requirements = never> = {
+  context: Context<Requirements>
+  ops: ((prevValue?: unknown) => Operation<Success, Failure, Requirements>)[]
   [Symbol.iterator](): Iterator<
-    YieldWrap<Effect<Success, Failure, Context>>,
+    YieldWrap<Effect<Success, Failure, Requirements>>,
     Success,
     any
   >
