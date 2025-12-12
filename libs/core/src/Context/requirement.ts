@@ -2,28 +2,32 @@ import type { Effect } from 'src/Effect'
 import { singleShotGen } from 'src/Effect/internal/singleshotgen'
 import { yieldWrap } from 'src/Effect/internal/yieldwrap'
 import * as Op from 'src/RuntimeOp'
+import { Narrow } from 'src/utils'
 import { empty } from './empty'
 
 export const Service =
-  (id: string) =>
-  <Self, Shape>(): ServiceContainer<Self, Shape> => {
+  <Id>(id: Narrow<Id>) =>
+  <Self, Shape>(): ServiceClass<Self, Id, Shape> => {
     return class {
-      static id = id
+      // constructor(impl: Shape) {
+      //   return impl as this
+      // }
+      static id = id as Id
       static context = empty()
-      static ops = [Op.inject(id)]
+      static ops = [Op.inject(id as string)]
       static [Symbol.iterator]() {
         return singleShotGen(yieldWrap(this))
       }
     }
   }
 
-export interface ServiceContainer<Self, Shape> extends Effect<
+export interface ServiceClass<Self, Id, Shape> extends Effect<
   Shape,
   never,
   Self
 > {
   new (impl: Shape): any
-  id: string
+  readonly id: Id
 }
 
 if (import.meta.vitest) {
@@ -37,7 +41,6 @@ if (import.meta.vitest) {
         Random,
         { readonly next: number }
       >() {}
-
       const program = Effect.gen(function* () {
         const random = yield* Random
         expectTypeOf(random).toEqualTypeOf<{ readonly next: number }>()

@@ -1,5 +1,6 @@
 export * from './add'
 export * from './context'
 export * from './empty'
+export * from './has'
 export * from './merge'
 export * from './requirement'

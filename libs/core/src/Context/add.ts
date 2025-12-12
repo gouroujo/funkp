@@ -1,10 +1,10 @@
 import { expect } from 'vitest'
 import { Context } from './context'
 import { clone } from './empty'
-import { ServiceContainer } from './requirement'
+import { ServiceClass } from './requirement'
 
 export const add =
-  <T, Shape>(tag: ServiceContainer<T, Shape>, service: Shape) =>
+  <T, Shape>(tag: ServiceClass<T, Shape>, service: Shape) =>
   <Services>(context: Context<Services>): Context<Services | T> => {
     const newContext = clone<Services | T>(context)
     newContext.services.set(tag.id as T, service)
@@ -26,7 +26,7 @@ if (import.meta.vitest) {
       const addService = Context.add(ServiceTest, { test: 'aaa' })
       const result = addService(context)
       expectTypeOf(result).toEqualTypeOf<Context<ServiceTest>>()
-      expect(result.services.has(ServiceTest.id as any)).toBe(true)
+      expect(Context.has(result, ServiceTest)).toBe(true)
     })
   })
 }

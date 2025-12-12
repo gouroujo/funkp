@@ -2,8 +2,8 @@ import * as Context from 'src/Context'
 import type { Effect } from '../effect'
 import { effectable } from '../internal/effectable'
 
-export const provide = <Service, Implementation>(
-  service: Context.ServiceContainer<Service, Implementation>,
+export const provide = <Service, Id, Implementation>(
+  service: Context.ServiceClass<Service, Id, Implementation>,
   implementation: Implementation,
 ): (<Success, Failure, Requirements>(
   effect: Effect<Success, Failure, Requirements>,
