@@ -1,33 +1,48 @@
 import type { Effect } from 'src/Effect'
 import { singleShotGen } from 'src/Effect/internal/singleshotgen'
-import { yieldWrap } from 'src/Effect/internal/yieldwrap'
-import * as Op from 'src/RuntimeOp'
-import { Narrow } from 'src/utils'
-import { empty } from './empty'
+import { YieldWrap, yieldWrap } from 'src/Effect/internal/yieldwrap'
+
+// export interface TagClassShape<Id, Shape> {
+//   readonly [TagTypeId]: TagTypeId
+//   readonly Type: Shape
+//   readonly Id: Id
+// }
+
+// export interface Tag<in out Id, in out Value> {
+//   readonly _op: 'Tag'
+//   readonly Service: Value
+//   readonly Identifier: Id
+//   // of(self: Value): Value
+// }
+
+export interface Tag<Id, Value> {
+  readonly Service: Value
+  readonly Identifier: Id
+}
 
 export const Service =
-  <Id>(id: Narrow<Id>) =>
-  <Self, Shape>(): ServiceClass<Self, Id, Shape> => {
+  <Id extends string>(id: Id) =>
+  <Self, Shape>(): TagClass<Self, Id, Shape> => {
     return class {
       // constructor(impl: Shape) {
       //   return impl as this
       // }
+      readonly id = id as Id
       static id = id as Id
-      static context = empty()
-      static ops = [Op.inject(id as string)]
+      static Identifier = this as Self
+      static Service: Shape
       static [Symbol.iterator]() {
         return singleShotGen(yieldWrap(this))
       }
     }
   }
 
-export interface ServiceClass<Self, Id, Shape> extends Effect<
-  Shape,
-  never,
-  Self
-> {
-  new (impl: Shape): any
+export interface TagClass<Self, Id, Shape>
+  extends Tag<Self, Shape>, Iterable<YieldWrap<Self>, Shape> {
+  new (impl: Shape): { id: Id }
   readonly id: Id
+  readonly Identifier: Self
+  readonly Service: Shape
 }
 
 if (import.meta.vitest) {

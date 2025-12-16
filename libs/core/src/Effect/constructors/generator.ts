@@ -13,19 +13,24 @@ type ExtractContext<T> = [T] extends [never]
   ? never
   : [T] extends [YieldWrap<Effect<unknown, unknown, infer C>>]
     ? C
-    : never
+    : [T] extends [YieldWrap<infer C>]
+      ? C extends Effect<unknown, unknown, unknown>
+        ? never
+        : C
+      : never
 
-export function gen<
-  YieldingValues extends YieldWrap<Effect<unknown, unknown, unknown>>,
-  Success,
->(
+export function gen<YieldingValues extends YieldWrap<unknown>, Success>(
   genFn: () => Generator<YieldingValues, Success>,
 ): Effect<
   Success,
   ExtractFailure<YieldingValues>,
   ExtractContext<YieldingValues>
 > {
-  return effectable([iterate(genFn)])
+  return effectable<
+    Success,
+    ExtractFailure<YieldingValues>,
+    ExtractContext<YieldingValues>
+  >([iterate(genFn)])
 }
 
 if (import.meta.vitest) {

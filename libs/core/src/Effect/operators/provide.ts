@@ -2,13 +2,13 @@ import * as Context from 'src/Context'
 import type { Effect } from '../effect'
 import { effectable } from '../internal/effectable'
 
-export const provide = <Service, Id, Implementation>(
-  service: Context.ServiceClass<Service, Id, Implementation>,
-  implementation: Implementation,
+export const provideService = <Id, Service>(
+  tag: Context.Tag<Id, Service>,
+  implementation: Service,
 ): (<Success, Failure, Requirements>(
   effect: Effect<Success, Failure, Requirements>,
-) => Effect<Success, Failure, Exclude<Requirements, Service>>) => {
-  const provider = Context.add(service, implementation)
+) => Effect<Success, Failure, Exclude<Requirements, Id>>) => {
+  const provider = Context.add(tag, implementation)
   return (effect) => effectable([...effect.ops], provider(effect.context))
 }
 
@@ -34,7 +34,7 @@ if (import.meta.vitest) {
         return value
       })
       expectTypeOf(program).toEqualTypeOf<Effect<number, never, Random>>()
-      const providedEffect = Effect.provide(Random, {
+      const providedEffect = Effect.provideService(Random, {
         next: Effect.succeed(3),
       })(program)
       expectTypeOf(providedEffect).toEqualTypeOf<Effect<number, never>>()
@@ -42,14 +42,14 @@ if (import.meta.vitest) {
     })
     it('should provide one service at a time', async () => {
       const program = Effect.gen(function* () {
-        const fooService = yield* Service2
+        yield* Service2
         const random = yield* Random
         return yield* random.next
       })
       expectTypeOf(program).toEqualTypeOf<
         Effect<number, never, Random | Service2>
       >()
-      const providedEffect = Effect.provide(Random, {
+      const providedEffect = Effect.provideService(Random, {
         next: Effect.succeed(3),
       })(program)
       expectTypeOf(providedEffect).toEqualTypeOf<

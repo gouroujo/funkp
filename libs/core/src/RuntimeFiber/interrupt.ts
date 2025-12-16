@@ -1,10 +1,9 @@
-import { InterruptedError } from 'src/Fiber'
 import * as Exit from '../Exit'
 import { RuntimeFiber } from './fiber'
 
 export const interrupt = <Success, Failure>(
   fiber: RuntimeFiber<Success, Failure>,
-  error: InterruptedError,
+  error: Error,
 ): void => {
   if (fiber.status !== 'interrupted') {
     fiber.status = 'interrupted'

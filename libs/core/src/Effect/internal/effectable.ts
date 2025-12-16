@@ -9,6 +9,7 @@ export const effectable = <Success, Failure, Requirements>(
   context: Context.Context<Requirements> = Context.empty<Requirements>(),
 ): Effect<Success, Failure, Requirements> => {
   return {
+    _tag: 'effect',
     ops,
     context,
     [Symbol.iterator]() {

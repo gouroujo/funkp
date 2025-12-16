@@ -1,9 +1,9 @@
 import { Context } from './context'
-import { ServiceClass } from './requirement'
+import { Tag } from './requirement'
 
 export const has = <T, Shape>(
   context: Context<unknown>,
-  tag: ServiceClass<T, Shape>,
+  tag: Tag<T, Shape>,
 ): context is Context<T> => {
-  return context.services.has(tag.id)
+  return context.services.has(tag)
 }

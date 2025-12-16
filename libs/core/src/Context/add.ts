@@ -1,13 +1,13 @@
 import { expect } from 'vitest'
 import { Context } from './context'
 import { clone } from './empty'
-import { ServiceClass } from './requirement'
+import { Tag } from './requirement'
 
 export const add =
-  <T, Shape>(tag: ServiceClass<T, Shape>, service: Shape) =>
+  <T, Shape>(tag: Tag<T, Shape>, service: Shape) =>
   <Services>(context: Context<Services>): Context<Services | T> => {
     const newContext = clone<Services | T>(context)
-    newContext.services.set(tag.id as T, service)
+    newContext.services.set(tag as T, service)
     return newContext
   }
 
@@ -22,11 +22,11 @@ if (import.meta.vitest) {
 
   describe('Context.add', () => {
     it('should add a service to the context', () => {
-      const context = Context.empty()
+      const emptyContext = Context.empty()
       const addService = Context.add(ServiceTest, { test: 'aaa' })
-      const result = addService(context)
-      expectTypeOf(result).toEqualTypeOf<Context<ServiceTest>>()
-      expect(Context.has(result, ServiceTest)).toBe(true)
+      const context = addService(emptyContext)
+      expectTypeOf(context).toEqualTypeOf<Context<ServiceTest>>()
+      expect(Context.has(context, ServiceTest)).toBe(true)
     })
   })
 }

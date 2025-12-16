@@ -1,3 +1,3 @@
-import { ServiceClass } from './requirement'
+import { TagClass } from './requirement'
 
-export const optional = <T, Shape>(tag: ServiceClass<T, Shape>) => {}
+export const optional = <T, Shape>(tag: TagClass<T, Shape>) => {}

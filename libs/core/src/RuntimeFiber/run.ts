@@ -140,20 +140,26 @@ function* main<Success, Failure>(
             let el = gen.next()
             while (!el.done) {
               if (isYieldWrap(el.value)) {
-                const effect = yieldWrapGet(el.value) as Effect.Effect<
-                  any,
-                  any,
-                  any
-                >
-
-                const childFiber = runLoop(fork(fiber, effect))
-                const result: ExitType<typeof childFiber> = yield C.wait(
-                  fiber.channel,
-                  wait(childFiber),
-                )
-                el = Exit.isSuccess(result)
-                  ? gen.next(result.success)
-                  : gen.throw(result.failure) // Stop execution on failure
+                const value = yieldWrapGet(el.value)
+                if (Effect.isEffect(value)) {
+                  const childFiber = runLoop(fork(fiber, value))
+                  const result: ExitType<typeof childFiber> = yield C.wait(
+                    fiber.channel,
+                    wait(childFiber),
+                  )
+                  el = Exit.isSuccess(result)
+                    ? gen.next(result.success)
+                    : gen.throw(result.failure) // Stop execution on failure
+                } else {
+                  const context = fiber.runtime.context
+                  if (context.services.has(value)) {
+                    el = gen.next(context.services.get(value))
+                  } else {
+                    el = gen.throw(new MissingDependencyError(value))
+                  }
+                }
+              } else {
+                el = gen.next(el.value)
               }
             }
             // const result = yield* main(op.fn(op.prevValue), fiber)
@@ -166,10 +172,10 @@ function* main<Success, Failure>(
           break
         }
         case Op.INJECT_OP: {
+          console.log(op)
           const context = fiber.runtime.context
-          const service = context.services.get(op.token)
           if (context.services.has(op.token)) {
-            current = ops.next(E.right(service))
+            current = ops.next(E.right(context.services.get(op.token)))
           } else {
             current = ops.throw(new MissingDependencyError(op.token))
           }
@@ -193,7 +199,10 @@ export const runLoop = <Success, Failure>(
     if (error instanceof InterruptedError) {
       interrupt(fiber, error)
     }
-    // console.error('error catched in runloop', error)
+    if (error instanceof MissingDependencyError) {
+      interrupt(fiber, error)
+    }
+    console.error('error catched in runloop', error)
   }
   return Object.assign(fiber, { status: 'running' })
 }

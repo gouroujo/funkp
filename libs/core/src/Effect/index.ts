@@ -5,3 +5,4 @@ export * from './operators'
 export * from './run'
 
 export * from './effect'
+export * from './isEffect'

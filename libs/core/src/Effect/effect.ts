@@ -13,6 +13,7 @@ export type Requirements<T extends Effect<unknown, unknown, any>> =
   T extends Effect<unknown, unknown, infer C> ? C : never
 
 export type Effect<Success, Failure = never, Requirements = never> = {
+  _tag: 'effect'
   context: Context<Requirements>
   ops: ((prevValue?: unknown) => Operation<Success, Failure, Requirements>)[]
   [Symbol.iterator](): Iterator<
